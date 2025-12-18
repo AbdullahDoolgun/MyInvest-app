@@ -32,12 +32,16 @@ class PortfolioStockCard extends StatelessWidget {
   Color _getBgColorForRec(BuildContext context, String rec) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     if (rec == "AL" || rec == "GÜÇLÜ AL") {
-      return isDark ? AppColors.up.withOpacity(0.2) : AppColors.upLight;
+      return isDark ? AppColors.up.withValues(alpha: 0.2) : AppColors.upLight;
     }
     if (rec == "SAT") {
-      return isDark ? AppColors.down.withOpacity(0.2) : AppColors.downLight;
+      return isDark
+          ? AppColors.down.withValues(alpha: 0.2)
+          : AppColors.downLight;
     }
-    return isDark ? AppColors.neutral.withOpacity(0.2) : AppColors.neutralLight;
+    return isDark
+        ? AppColors.neutral.withValues(alpha: 0.2)
+        : AppColors.neutralLight;
   }
 
   Widget _buildRecTag(BuildContext context, String label, String value) {
@@ -84,7 +88,7 @@ class PortfolioStockCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.05),
+            color: Colors.black.withValues(alpha: 0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -130,7 +134,7 @@ class PortfolioStockCard extends StatelessWidget {
                         fontSize: 12,
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.9),
+                        ).colorScheme.onSurface.withValues(alpha: 0.9),
                       ),
                     ),
                   ],

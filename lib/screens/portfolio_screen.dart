@@ -47,7 +47,7 @@ class PortfolioScreen extends StatelessWidget {
                               style: TextStyle(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withOpacity(0.7),
+                                ).colorScheme.onSurface.withValues(alpha: 0.7),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -104,7 +104,7 @@ class PortfolioScreen extends StatelessWidget {
                           border: Border.all(
                             color: Theme.of(
                               context,
-                            ).colorScheme.outline.withOpacity(0.1),
+                            ).colorScheme.outline.withValues(alpha: 0.1),
                           ),
                         ),
                         child: const Icon(

@@ -34,7 +34,7 @@ class SettingsScreen extends StatelessWidget {
         color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
         ),
       ),
       child: ListTile(
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
         leading: Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: iconColor.withOpacity(0.1),
+            color: iconColor.withValues(alpha: 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(icon, color: iconColor, size: 20),
@@ -158,7 +158,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: Switch(
               value: true,
               onChanged: (v) {},
-              activeColor: AppColors.accent,
+              activeThumbColor: AppColors.accent,
             ),
           ),
           _buildSettingsTile(
@@ -168,7 +168,7 @@ class SettingsScreen extends StatelessWidget {
             trailing: Switch(
               value: false,
               onChanged: (v) {},
-              activeColor: AppColors.accent,
+              activeThumbColor: AppColors.accent,
             ),
           ),
 
@@ -188,7 +188,7 @@ class SettingsScreen extends StatelessWidget {
                       onChanged: (value) {
                         context.read<ThemeCubit>().toggleTheme();
                       },
-                      activeColor: AppColors.accent,
+                      activeThumbColor: AppColors.accent,
                     ),
                   ),
                   _buildSettingsTile(

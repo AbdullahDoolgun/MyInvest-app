@@ -41,8 +41,6 @@ class AppColors {
     onSecondary: Colors.white,
     surface: primary, // Navy background for surface
     onSurface: Colors.white, // White text on Navy surface
-    background: primaryLight, // Slightly lighter navy for background
-    onBackground: Colors.white,
     error: down,
     onError: Colors.white,
     outline: Colors.white24,
