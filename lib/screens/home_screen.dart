@@ -31,17 +31,22 @@ class HomeScreen extends StatelessWidget {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  color: Colors.white,
-                  child: const ExpansionTile(
-                    leading: Icon(Icons.history, color: AppColors.primary),
+                  color: Theme.of(context).cardColor,
+                  child: ExpansionTile(
+                    leading: Icon(
+                      Icons.history,
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     title: Text(
                       "Geçmiş İşlemler",
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
-                    children: [
+                    collapsedIconColor: Theme.of(context).colorScheme.onSurface,
+                    iconColor: Theme.of(context).colorScheme.primary,
+                    children: const [
                       ListTile(
                         title: Text("BIMAS - Alış"),
                         subtitle: Text("12.12.2023 - 10 Adet"),
@@ -62,11 +67,13 @@ class HomeScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppColors.primary,
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.primary, // Navy in Light, White in Dark
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.3),
+                        color: AppColors.primary.withOpacity(0.3),
                         blurRadius: 10,
                         offset: const Offset(0, 5),
                       ),
@@ -75,20 +82,22 @@ class HomeScreen extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
+                      Text(
                         "PORTFÖY GÜNCEL TUTARI",
                         style: TextStyle(
-                          color: Colors.white70,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary.withOpacity(0.7),
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                       const SizedBox(height: 8),
                       // Simplified calc or hardcoded for now, or sum from portfolio
-                      const Text(
+                      Text(
                         "₺158,245.50",
                         style: TextStyle(
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.onPrimary,
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
                         ),
@@ -102,20 +111,26 @@ class HomeScreen extends StatelessWidget {
                               Container(
                                 padding: const EdgeInsets.all(4),
                                 decoration: BoxDecoration(
-                                  color: Colors.white24,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary.withOpacity(0.2),
                                   shape: BoxShape.circle,
                                 ),
-                                child: const Icon(
+                                child: Icon(
                                   Icons.show_chart,
-                                  color: Colors.white,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   size: 16,
                                 ),
                               ),
                               const SizedBox(width: 8),
-                              const Text(
+                              Text(
                                 "+₺12,540.20",
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onPrimary,
                                   fontWeight: FontWeight.bold,
                                   fontSize: 16,
                                 ),
@@ -134,7 +149,8 @@ class HomeScreen extends StatelessWidget {
                             child: const Text(
                               "%8.61",
                               style: TextStyle(
-                                color: Colors.white,
+                                color: Colors
+                                    .white, // Keep white as 'up' color is usually solid
                                 fontWeight: FontWeight.bold,
                               ),
                             ),
@@ -147,12 +163,12 @@ class HomeScreen extends StatelessWidget {
                 const SizedBox(height: 24),
 
                 // 3. Owned Stocks Header
-                const Text(
+                Text(
                   "Portföyüm",
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                    color: Theme.of(context).colorScheme.onSurface,
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -175,12 +191,12 @@ class HomeScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       "Favori Hisseler",
                       style: TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     IconButton(

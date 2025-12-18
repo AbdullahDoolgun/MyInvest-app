@@ -17,4 +17,34 @@ class AppColors {
 
   static const Color textPrimary = Color(0xFF0A1930);
   static const Color textSecondary = Color(0xFF78909C);
+
+  // Light Theme Scheme
+  static const ColorScheme lightScheme = ColorScheme(
+    brightness: Brightness.light,
+    primary: primary,
+    onPrimary: Colors.white,
+    secondary: accent,
+    onSecondary: Colors.white,
+    surface: surface,
+    onSurface: textPrimary,
+    error: down,
+    onError: Colors.white,
+    outline: Colors.grey,
+  );
+
+  // Dark Theme Scheme
+  static const ColorScheme darkScheme = ColorScheme(
+    brightness: Brightness.dark,
+    primary: Colors.white, // Inverted from Navy
+    onPrimary: primary, // Navy text on White primary (if used)
+    secondary: accent,
+    onSecondary: Colors.white,
+    surface: primary, // Navy background for surface
+    onSurface: Colors.white, // White text on Navy surface
+    background: primaryLight, // Slightly lighter navy for background
+    onBackground: Colors.white,
+    error: down,
+    onError: Colors.white,
+    outline: Colors.white24,
+  );
 }

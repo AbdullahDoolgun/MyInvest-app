@@ -40,31 +40,41 @@ class _MainScreenState extends State<MainScreen> {
     bool showFab =
         !_isSettingsOpen && (_selectedIndex == 1 || _selectedIndex == 2);
 
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: AppColors.primary,
+        backgroundColor: isDark ? colorScheme.surface : AppColors.primary,
         elevation: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: const [
+          children: [
             Text(
               "Hoş Geldiniz",
-              style: TextStyle(fontSize: 12, color: Colors.white70),
+              style: TextStyle(
+                fontSize: 12,
+                color: isDark ? Colors.white70 : Colors.white70,
+              ),
             ),
             Text(
               "Ahmet Bey",
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Colors.white,
+                color: isDark ? Colors.white : Colors.white,
               ),
             ),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.settings, color: Colors.white),
+            icon: Icon(
+              Icons.settings,
+              color: isDark ? Colors.white : Colors.white,
+            ),
             onPressed: _openSettings,
           ),
         ],
@@ -72,22 +82,18 @@ class _MainScreenState extends State<MainScreen> {
       body: _isSettingsOpen ? const SettingsScreen() : _pages[_selectedIndex],
       floatingActionButton: showFab
           ? FloatingActionButton(
-              onPressed: () {
-                // Add stock action placeholder
-                // Add stock action placeholder
-                // debugPrint("Add Stock Clicked");
-              },
+              onPressed: () {},
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add, color: Colors.white),
             )
           : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Colors.white,
+        backgroundColor: isDark ? colorScheme.surface : Colors.white,
         selectedItemColor: _isSettingsOpen
-            ? AppColors.textSecondary
-            : AppColors.primary,
-        unselectedItemColor: AppColors.textSecondary,
+            ? colorScheme.onSurface.withValues(alpha: 0.5)
+            : (isDark ? AppColors.accent : AppColors.primary),
+        unselectedItemColor: colorScheme.onSurface.withValues(alpha: 0.5),
         currentIndex: _selectedIndex,
         onTap: _closeSettingsAndNavigate,
         type: BottomNavigationBarType.fixed,

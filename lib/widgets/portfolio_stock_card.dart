@@ -29,28 +29,33 @@ class PortfolioStockCard extends StatelessWidget {
     return AppColors.textSecondary; // Nötr
   }
 
-  Color _getBgColorForRec(String rec) {
-    if (rec == "AL" || rec == "GÜÇLÜ AL") return AppColors.upLight;
-    if (rec == "SAT") return AppColors.downLight;
-    return AppColors.neutralLight;
+  Color _getBgColorForRec(BuildContext context, String rec) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    if (rec == "AL" || rec == "GÜÇLÜ AL") {
+      return isDark ? AppColors.up.withOpacity(0.2) : AppColors.upLight;
+    }
+    if (rec == "SAT") {
+      return isDark ? AppColors.down.withOpacity(0.2) : AppColors.downLight;
+    }
+    return isDark ? AppColors.neutral.withOpacity(0.2) : AppColors.neutralLight;
   }
 
-  Widget _buildRecTag(String label, String value) {
+  Widget _buildRecTag(BuildContext context, String label, String value) {
     return Expanded(
       child: Container(
         margin: const EdgeInsets.symmetric(horizontal: 4),
         padding: const EdgeInsets.symmetric(vertical: 8),
         decoration: BoxDecoration(
-          color: _getBgColorForRec(value),
+          color: _getBgColorForRec(context, value),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
           children: [
             Text(
               label,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 10,
-                color: Colors.grey,
+                color: Theme.of(context).colorScheme.onSurface,
                 fontWeight: FontWeight.bold,
               ),
             ),
@@ -75,11 +80,11 @@ class PortfolioStockCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: Theme.of(context).cardColor,
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: Colors.black.withOpacity(0.05),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
@@ -94,15 +99,15 @@ class PortfolioStockCard extends StatelessWidget {
                 height: 40,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.secondary,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   symbol.substring(0, symbol.length > 4 ? 4 : symbol.length),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontWeight: FontWeight.bold,
                     fontSize: 10,
-                    color: Colors.white,
+                    color: Theme.of(context).colorScheme.onSecondary,
                   ),
                 ),
               ),
@@ -113,17 +118,19 @@ class PortfolioStockCard extends StatelessWidget {
                   children: [
                     Text(
                       symbol,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 16,
-                        color: AppColors.textPrimary,
+                        color: Theme.of(context).colorScheme.onSurface,
                       ),
                     ),
                     Text(
                       name,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 12,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withOpacity(0.9),
                       ),
                     ),
                   ],
@@ -134,10 +141,10 @@ class PortfolioStockCard extends StatelessWidget {
                 children: [
                   Text(
                     price,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 16,
-                      color: AppColors.textPrimary,
+                      color: Theme.of(context).colorScheme.onSurface,
                     ),
                   ),
                   Text(
@@ -156,9 +163,9 @@ class PortfolioStockCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              _buildRecTag("HAFTALIK", weekly),
-              _buildRecTag("AYLIK", monthly),
-              _buildRecTag("3 AYLIK", threeMonthly),
+              _buildRecTag(context, "HAFTALIK", weekly),
+              _buildRecTag(context, "AYLIK", monthly),
+              _buildRecTag(context, "3 AYLIK", threeMonthly),
             ],
           ),
         ],

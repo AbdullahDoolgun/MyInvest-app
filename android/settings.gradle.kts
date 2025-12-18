@@ -1,3 +1,4 @@
+
 pluginManagement {
     val flutterSdkPath =
         run {
@@ -6,6 +7,7 @@ pluginManagement {
             val flutterSdkPath = properties.getProperty("flutter.sdk")
             require(flutterSdkPath != null) { "flutter.sdk not set in local.properties" }
             flutterSdkPath
+
         }
 
     includeBuild("$flutterSdkPath/packages/flutter_tools/gradle")
@@ -14,6 +16,7 @@ pluginManagement {
         google()
         mavenCentral()
         gradlePluginPortal()
+
     }
 }
 
@@ -26,3 +29,5 @@ plugins {
 include(":app")
 
 rootProject.name = "stock_tracker_android"
+
+

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
-import '../widgets/stock_card.dart';
+
 import '../blocs/stock/stock_bloc.dart';
 
 class LiveTrackingScreen extends StatelessWidget {
@@ -24,7 +24,7 @@ class LiveTrackingScreen extends StatelessWidget {
                 // Search Bar
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(12),
                     boxShadow: [
                       BoxShadow(
@@ -35,11 +35,21 @@ class LiveTrackingScreen extends StatelessWidget {
                     ],
                   ),
                   child: TextField(
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
                     decoration: InputDecoration(
                       hintText: "Hisse Kodu veya Şirket Adı Ara...",
-                      prefixIcon: const Icon(
+                      hintStyle: TextStyle(
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
+                      ),
+                      prefixIcon: Icon(
                         Icons.search,
-                        color: AppColors.textSecondary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.5),
                       ),
                       border: InputBorder.none,
                       contentPadding: const EdgeInsets.symmetric(
@@ -55,9 +65,13 @@ class LiveTrackingScreen extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: Theme.of(context).cardColor,
                     borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Colors.grey.shade200),
+                    border: Border.all(
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outline.withValues(alpha: 0.1),
+                    ),
                   ),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -65,26 +79,30 @@ class LiveTrackingScreen extends StatelessWidget {
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             "BIST 100",
                             style: TextStyle(
-                              color: AppColors.textSecondary,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurface.withValues(alpha: 0.7),
                               fontSize: 12,
                             ),
                           ),
                           const SizedBox(height: 4),
                           Row(
-                            children: const [
+                            children: [
                               Text(
                                 "8,450.75",
                                 style: TextStyle(
                                   fontSize: 20,
                                   fontWeight: FontWeight.bold,
-                                  color: AppColors.textPrimary,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurface,
                                 ),
                               ),
-                              SizedBox(width: 8),
-                              Text(
+                              const SizedBox(width: 8),
+                              const Text(
                                 "+140.10",
                                 style: TextStyle(
                                   fontSize: 14,
@@ -122,24 +140,30 @@ class LiveTrackingScreen extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text(
+                    Text(
                       "TAKİP LİSTEN",
                       style: TextStyle(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(
+                          context,
+                        ).colorScheme.onSurface.withValues(alpha: 0.7),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                     Row(
-                      children: const [
+                      children: [
                         Icon(
                           Icons.sort,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                           size: 20,
                         ),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Icon(
                           Icons.filter_list,
-                          color: AppColors.textSecondary,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
                           size: 20,
                         ),
                       ],
@@ -148,15 +172,27 @@ class LiveTrackingScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
 
-                // Stocks List - Showing all stocks as tracked for demo
-                ...state.allStocks.map(
-                  (stock) => StockCard(
-                    symbol: stock.symbol,
-                    name: stock.name,
-                    price: stock.priceString,
-                    change: stock.changeString,
-                    isUp: stock.isUp,
+                // Stocks Grid
+                GridView.builder(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                    maxCrossAxisExtent: 200,
+                    childAspectRatio: 1.5,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 12,
                   ),
+                  itemCount: state.allStocks.length,
+                  itemBuilder: (context, index) {
+                    final stock = state.allStocks[index];
+                    return _GridStockCard(
+                      symbol: stock.symbol,
+                      name: stock.name,
+                      price: stock.priceString,
+                      change: stock.changeString,
+                      isUp: stock.isUp,
+                    );
+                  },
                 ),
 
                 const SizedBox(height: 80),
@@ -166,6 +202,128 @@ class LiveTrackingScreen extends StatelessWidget {
         }
         return const SizedBox();
       },
+    );
+  }
+}
+
+class _GridStockCard extends StatelessWidget {
+  final String symbol;
+  final String name;
+  final String price;
+  final String change;
+  final bool isUp;
+
+  const _GridStockCard({
+    required this.symbol,
+    required this.name,
+    required this.price,
+    required this.change,
+    required this.isUp,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+        border: Border.all(color: colorScheme.outline.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                width: 32,
+                height: 32,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: colorScheme.surface, // Adjust if needed for contrast
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                    color: colorScheme.outline.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Text(
+                  symbol.substring(0, symbol.length > 2 ? 2 : symbol.length),
+                  style: TextStyle(
+                    fontWeight: FontWeight.bold,
+                    fontSize: 10,
+                    color: colorScheme.onSurface,
+                  ),
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: isUp ? AppColors.upLight : AppColors.downLight,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      isUp ? Icons.arrow_upward : Icons.arrow_downward,
+                      size: 10,
+                      color: isUp ? AppColors.up : AppColors.down,
+                    ),
+                    const SizedBox(width: 2),
+                    Text(
+                      change,
+                      style: TextStyle(
+                        fontSize: 10,
+                        fontWeight: FontWeight.bold,
+                        color: isUp ? AppColors.up : AppColors.down,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const Spacer(),
+          Text(
+            symbol,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          Text(
+            name,
+            style: TextStyle(
+              fontSize: 10,
+              color: colorScheme.onSurface.withValues(alpha: 0.7),
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            price,
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 16,
+              color: colorScheme.onSurface,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
