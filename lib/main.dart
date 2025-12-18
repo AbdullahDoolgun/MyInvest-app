@@ -1,25 +1,48 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'core/router/app_router.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'screens/main_screen.dart';
+import 'constants/colors.dart';
+import 'data/stock_repository.dart';
+import 'blocs/stock/stock_bloc.dart';
 
 void main() {
-  runApp(const ProviderScope(child: MyApp()));
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: AppColors.primary,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
+  final stockRepository = StockRepository();
+
+  runApp(MainApp(stockRepository: stockRepository));
 }
 
-class MyApp extends ConsumerWidget {
-  const MyApp({super.key});
+class MainApp extends StatelessWidget {
+  final StockRepository stockRepository;
+
+  const MainApp({super.key, required this.stockRepository});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(goRouterProvider);
-
-    return MaterialApp.router(
-      title: 'Stock Tracker',
-      theme: ThemeData(
-        colorScheme: ColorScheme.fromSeed(seedColor: Colors.deepPurple),
-        useMaterial3: true,
+  Widget build(BuildContext context) {
+    return RepositoryProvider.value(
+      value: stockRepository,
+      child: BlocProvider(
+        create: (context) =>
+            StockBloc(repository: stockRepository)..add(LoadStocks()),
+        child: MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Borsa App',
+          theme: ThemeData(
+            fontFamily: 'Roboto',
+            primaryColor: AppColors.primary,
+            scaffoldBackgroundColor: AppColors.background,
+            useMaterial3: true,
+          ),
+          home: const MainScreen(),
+        ),
       ),
-      routerConfig: router,
     );
   }
 }
