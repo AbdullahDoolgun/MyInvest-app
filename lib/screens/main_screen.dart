@@ -49,13 +49,14 @@ class _MainScreenState extends State<MainScreen> {
       appBar: AppBar(
         backgroundColor: isDark ? colorScheme.surface : AppColors.primary,
         elevation: 0,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Text(
-              "Hoş Geldiniz",
+             Text(
+              "Hoş Geldiniz, ",
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 14,
+                fontWeight: FontWeight.w300, 
                 color: isDark ? Colors.white70 : Colors.white70,
               ),
             ),

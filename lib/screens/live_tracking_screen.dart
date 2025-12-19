@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
 
 import '../blocs/stock/stock_bloc.dart';
+import 'fullscreen_stock_view.dart';
 
 class LiveTrackingScreen extends StatelessWidget {
   const LiveTrackingScreen({super.key});
@@ -74,8 +75,28 @@ class LiveTrackingScreen extends StatelessWidget {
                     ),
                   ),
                   child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Percentage on Left (Swapped from right)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 8,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.upLight,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          "+%1.87",
+                          style: TextStyle(
+                            color: AppColors.up,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      // Market Info
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -89,47 +110,67 @@ class LiveTrackingScreen extends StatelessWidget {
                             ),
                           ),
                           const SizedBox(height: 4),
-                          Row(
-                            children: [
-                              Text(
-                                "8,450.75",
-                                style: TextStyle(
-                                  fontSize: 20,
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onSurface,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Text(
-                                "+140.10",
-                                style: TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.up,
-                                ),
-                              ),
-                            ],
+                          Text(
+                            "8.450,75",
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.bold,
+                              color: Theme.of(context).colorScheme.onSurface,
+                            ),
                           ),
                         ],
                       ),
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: AppColors.upLight,
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: const Text(
-                          "+1.87%",
-                          style: TextStyle(
-                            color: AppColors.up,
-                            fontWeight: FontWeight.bold,
+                      const Spacer(),
+                      // Top Risers / Fallers Links
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => FullScreenStockView(
+                                        allStocks: state.allStocks,
+                                        mode: ViewMode.Risers,
+                                      ),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Canlı En Çok Yükselenler",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.up,
+                              ),
+                            ),
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          InkWell(
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder:
+                                      (_) => FullScreenStockView(
+                                        allStocks: state.allStocks,
+                                        mode: ViewMode.Fallers,
+                                      ),
+                                ),
+                              );
+                            },
+                            child: const Text(
+                              "Canlı En Çok Düşenler",
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.down,
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                     ],
                   ),
@@ -178,7 +219,7 @@ class LiveTrackingScreen extends StatelessWidget {
                   physics: const NeverScrollableScrollPhysics(),
                   gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                     maxCrossAxisExtent: 200,
-                    childAspectRatio: 1.5,
+                    childAspectRatio: 1.3, // Decreased from 1.5 to prevent bottom overflow
                     crossAxisSpacing: 12,
                     mainAxisSpacing: 12,
                   ),

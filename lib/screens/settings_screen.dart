@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
 import '../blocs/theme/theme_cubit.dart';
+import '../blocs/settings/settings_cubit.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -124,6 +125,63 @@ class SettingsScreen extends StatelessWidget {
     return "Orta";
   }
 
+  void _showCurrencyBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Container(
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Theme.of(context).cardColor,
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Para Birimi Seçin",
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...AppCurrency.values.map(
+                (currency) => _buildCurrencyOption(context, currency),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCurrencyOption(BuildContext context, AppCurrency currency) {
+    final currentCurrency = context.watch<SettingsCubit>().state.currency;
+    final isSelected = currentCurrency == currency;
+
+    return ListTile(
+      title: Text(
+        currency.label,
+        style: TextStyle(
+          color: Theme.of(context).colorScheme.onSurface,
+          fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+        ),
+      ),
+      trailing: isSelected
+          ? const Icon(Icons.check, color: AppColors.accent)
+          : null,
+      onTap: () {
+        context.read<SettingsCubit>().setCurrency(currency);
+        Navigator.pop(context);
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -170,6 +228,24 @@ class SettingsScreen extends StatelessWidget {
               onChanged: (v) {},
               activeThumbColor: AppColors.accent,
             ),
+          ),
+
+          const SizedBox(height: 16),
+          const SizedBox(height: 16),
+          _buildSectionHeader(context, "Arayüz Özelleştirme"),
+          BlocBuilder<SettingsCubit, SettingsState>(
+            builder: (context, state) {
+              return _buildSettingsTile(
+                context,
+                icon: Icons.currency_exchange,
+                title: "Ana Sayfa Değeri",
+                trailing: Text(
+                  state.currency.label,
+                  style: const TextStyle(color: Colors.grey, fontSize: 12),
+                ),
+                onTap: () => _showCurrencyBottomSheet(context),
+              );
+            },
           ),
 
           const SizedBox(height: 16),

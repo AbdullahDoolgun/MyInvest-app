@@ -7,6 +7,7 @@ import 'data/stock_repository.dart';
 import 'blocs/stock/stock_bloc.dart';
 
 import 'blocs/theme/theme_cubit.dart';
+import 'blocs/settings/settings_cubit.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -37,6 +38,7 @@ class MainApp extends StatelessWidget {
                 StockBloc(repository: stockRepository)..add(LoadStocks()),
           ),
           BlocProvider(create: (context) => ThemeCubit()),
+          BlocProvider(create: (context) => SettingsCubit()),
         ],
         child: BlocBuilder<ThemeCubit, ThemeState>(
           builder: (context, state) {

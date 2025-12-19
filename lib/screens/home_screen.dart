@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
 import '../widgets/stock_card.dart';
 import '../blocs/stock/stock_bloc.dart';
+import '../blocs/settings/settings_cubit.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -79,85 +80,96 @@ class HomeScreen extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        "PORTFÖY GÜNCEL TUTARI",
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimary.withValues(alpha: 0.7),
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 8),
-                      // Simplified calc or hardcoded for now, or sum from portfolio
-                      Text(
-                        "₺158,245.50",
-                        style: TextStyle(
-                          color: Theme.of(context).colorScheme.onPrimary,
-                          fontSize: 32,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  child: BlocBuilder<SettingsCubit, SettingsState>(
+                    builder: (context, settingsState) {
+                      const double basePortfolioValue = 158245.50;
+                      const double baseProfitValue = 12540.20;
+
+                      double convertedPortfolio =
+                          basePortfolioValue / settingsState.currency.rateToTry;
+                      double convertedProfit =
+                          baseProfitValue / settingsState.currency.rateToTry;
+
+                      // Use NumberFormat ideally, but toStringAsFixed(2) is fine for now
+                      // Adding commas would be better but requires intl package or custom logic
+                      String pValue = settingsState.currency.format(convertedPortfolio);
+                      String profitValue = "+${settingsState.currency.format(convertedProfit)}";
+
+                      return Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
+                          Text(
+                            "PORTFÖY GÜNCEL TUTARI",
+                            style: TextStyle(
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onPrimary.withValues(alpha: 0.7),
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            pValue,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onPrimary,
+                              fontSize: 32,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          const SizedBox(height: 16),
                           Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Container(
-                                padding: const EdgeInsets.all(4),
-                                decoration: BoxDecoration(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary.withOpacity(0.2),
-                                  shape: BoxShape.circle,
-                                ),
-                                child: Icon(
-                                  Icons.show_chart,
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                  size: 16,
-                                ),
+                              Row(
+                                children: [
+                                  Container(
+                                    padding: const EdgeInsets.all(4),
+                                    decoration: BoxDecoration(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary.withOpacity(0.2),
+                                      shape: BoxShape.circle,
+                                    ),
+                                    child: Icon(
+                                      Icons.show_chart,
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      size: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    profitValue,
+                                    style: TextStyle(
+                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                "+₺12,540.20",
-                                style: TextStyle(
-                                  color: Theme.of(
-                                    context,
-                                  ).colorScheme.onPrimary,
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.up,
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: const Text(
+                                  "%8.61",
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold,
+                                  ),
                                 ),
                               ),
                             ],
                           ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 12,
-                              vertical: 6,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.up,
-                              borderRadius: BorderRadius.circular(20),
-                            ),
-                            child: const Text(
-                              "%8.61",
-                              style: TextStyle(
-                                color: Colors
-                                    .white, // Keep white as 'up' color is usually solid
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
                         ],
-                      ),
-                    ],
+                      );
+                    },
                   ),
                 ),
                 const SizedBox(height: 24),

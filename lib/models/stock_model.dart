@@ -14,7 +14,18 @@ class Stock {
   bool get isUp => changeRate >= 0;
   String get changeString =>
       "${changeRate >= 0 ? '+' : ''}${changeRate.toStringAsFixed(2)}%";
-  String get priceString => "₺${price.toStringAsFixed(2)}";
+  String get priceString {
+    String valueStr = price.toStringAsFixed(2);
+    List<String> parts = valueStr.split('.');
+    String wholePart = parts[0];
+    String decimalPart = parts[1];
+
+    RegExp reg = RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))');
+    
+    wholePart = wholePart.replaceAllMapped(reg, (Match match) => '${match[1]}.');
+    
+    return "₺$wholePart,$decimalPart";
+  }
 }
 
 class PortfolioItem {
