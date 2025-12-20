@@ -44,8 +44,19 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 
-# Android build outputs----------------
+# Android build outputs---
 *.apk
 *.so
 android/build/
 android/app/build/
+
+# APi keys and secrets
+/lib/constants/app_secrets.dart
+*.env
+.env
+config.properties
+application.properties
+secrets.yml
+*.key
+*.pem
+

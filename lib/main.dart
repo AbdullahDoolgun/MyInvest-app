@@ -1,15 +1,26 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'screens/main_screen.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'constants/colors.dart';
+import 'constants/app_secrets.dart';
 import 'data/stock_repository.dart';
+import 'data/supabase_auth_repository.dart';
+import 'data/supabase_portfolio_repository.dart';
 import 'blocs/stock/stock_bloc.dart';
-
 import 'blocs/theme/theme_cubit.dart';
 import 'blocs/settings/settings_cubit.dart';
+import 'blocs/auth/auth_cubit.dart';
+import 'widgets/auth_gate.dart';
 
-void main() {
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Supabase.initialize(
+    url: AppSecrets.supabaseUrl,
+    anonKey: AppSecrets.supabaseAnonKey,
+  );
+
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: AppColors.primary,
@@ -18,21 +29,41 @@ void main() {
   );
 
   final stockRepository = StockRepository();
+  final authRepository = SupabaseAuthRepository();
+  final portfolioRepository = SupabasePortfolioRepository();
 
-  runApp(MainApp(stockRepository: stockRepository));
+  runApp(
+    MainApp(
+      stockRepository: stockRepository,
+      authRepository: authRepository,
+      portfolioRepository: portfolioRepository,
+    ),
+  );
 }
 
 class MainApp extends StatelessWidget {
   final StockRepository stockRepository;
+  final SupabaseAuthRepository authRepository;
+  final SupabasePortfolioRepository portfolioRepository;
 
-  const MainApp({super.key, required this.stockRepository});
+  const MainApp({
+    super.key,
+    required this.stockRepository,
+    required this.authRepository,
+    required this.portfolioRepository,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return RepositoryProvider.value(
-      value: stockRepository,
+    return MultiRepositoryProvider(
+      providers: [
+        RepositoryProvider.value(value: stockRepository),
+        RepositoryProvider.value(value: authRepository),
+        RepositoryProvider.value(value: portfolioRepository),
+      ],
       child: MultiBlocProvider(
         providers: [
+          BlocProvider(create: (context) => AuthCubit(authRepository)),
           BlocProvider(
             create: (context) =>
                 StockBloc(repository: stockRepository)..add(LoadStocks()),
@@ -68,7 +99,7 @@ class MainApp extends StatelessWidget {
                   child: child!,
                 );
               },
-              home: const MainScreen(),
+              home: const AuthGate(),
             );
           },
         ),
