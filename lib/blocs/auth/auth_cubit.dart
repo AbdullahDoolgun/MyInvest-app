@@ -13,6 +13,14 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   void _init() {
+    // Check initial session immediately
+    final currentUser = _authRepository.currentUser;
+    if (currentUser != null) {
+      emit(Authenticated(currentUser));
+    } else {
+      emit(Unauthenticated());
+    }
+
     _authRepository.authStateChanges.listen((data) {
       final Session? session = data.session;
       if (session != null) {
