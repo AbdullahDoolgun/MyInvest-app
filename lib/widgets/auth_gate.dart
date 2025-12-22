@@ -11,16 +11,15 @@ class AuthGate extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<AuthCubit, AuthState>(
       builder: (context, state) {
-        if (state is Authenticated) {
-          return const MainScreen(); // MainScreen likely exists based on file list
-        } else if (state is Unauthenticated) {
-          return const LoginScreen();
-        } 
-        
-        // Show loading or splash while initializing
-        return const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        );
+        if (state is AuthInitial) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        } else if (state is Authenticated) {
+          return const MainScreen();
+        }
+        // Unauthenticated, AuthError, AuthLoading (during login)
+        return const LoginScreen();
       },
     );
   }

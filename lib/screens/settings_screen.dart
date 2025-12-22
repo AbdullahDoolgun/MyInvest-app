@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
 import '../blocs/theme/theme_cubit.dart';
 import '../blocs/settings/settings_cubit.dart';
+import '../blocs/auth/auth_cubit.dart'; // Add this line
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
@@ -182,6 +183,224 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
+  void _showEditProfileBottomSheet(BuildContext context) {
+    final authState = context.read<AuthCubit>().state;
+    if (authState is! Authenticated) return;
+
+    final user = authState.user;
+    final metadata = user.userMetadata ?? {};
+
+    final firstNameController = TextEditingController(text: metadata['first_name'] as String? ?? '');
+    final lastNameController = TextEditingController(text: metadata['last_name'] as String? ?? '');
+    final ageController = TextEditingController(text: (metadata['age'] as int?)?.toString() ?? '');
+    final cityController = TextEditingController(text: metadata['city'] as String? ?? '');
+    final countryController = TextEditingController(text: metadata['country'] as String? ?? 'Türkiye');
+    String selectedGender = metadata['gender'] as String? ?? 'Erkek';
+    final genders = ['Erkek', 'Kadın', 'Diğer'];
+    
+    // Ensure selectedGender is valid
+    if (!genders.contains(selectedGender)) selectedGender = 'Erkek';
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return Container(
+              padding: EdgeInsets.only(
+                top: 24,
+                left: 24,
+                right: 24,
+                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Text(
+                    "Profili Düzenle",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 24),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: firstNameController,
+                          decoration: const InputDecoration(labelText: 'Ad'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          controller: lastNameController,
+                          decoration: const InputDecoration(labelText: 'Soyad'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 2,
+                        child: DropdownButtonFormField<String>(
+                          value: selectedGender,
+                          decoration: const InputDecoration(labelText: 'Cinsiyet'),
+                          items: genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                          onChanged: (val) {
+                            if (val != null) setState(() => selectedGender = val);
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        flex: 1,
+                        child: TextField(
+                          controller: ageController,
+                          decoration: const InputDecoration(labelText: 'Yaş'),
+                          keyboardType: TextInputType.number,
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: countryController,
+                          decoration: const InputDecoration(labelText: 'Ülke'),
+                        ),
+                      ),
+                      const SizedBox(width: 16),
+                      Expanded(
+                        child: TextField(
+                          controller: cityController,
+                          decoration: const InputDecoration(labelText: 'Şehir'),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+                  ElevatedButton(
+                    onPressed: () {
+                      context.read<AuthCubit>().updateProfile(
+                            firstName: firstNameController.text.trim(),
+                            lastName: lastNameController.text.trim(),
+                            gender: selectedGender,
+                            age: int.tryParse(ageController.text),
+                            city: cityController.text.trim(),
+                            country: countryController.text.trim(),
+                          );
+                      Navigator.pop(context);
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Profil güncellendi')),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.accent,
+                      foregroundColor: Colors.white,
+                    ),
+                    child: const Text('Kaydet'),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showChangePasswordBottomSheet(BuildContext context) {
+    final passwordController = TextEditingController();
+    final confirmPasswordController = TextEditingController();
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            top: 24,
+            left: 24,
+            right: 24,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Şifre Değiştir",
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 24),
+              TextField(
+                controller: passwordController,
+                decoration: const InputDecoration(labelText: 'Yeni Şifre'),
+                obscureText: true,
+              ),
+              const SizedBox(height: 16),
+              TextField(
+                controller: confirmPasswordController,
+                decoration: const InputDecoration(labelText: 'Yeni Şifre (Tekrar)'),
+                obscureText: true,
+              ),
+              const SizedBox(height: 24),
+              ElevatedButton(
+                onPressed: () {
+                  final password = passwordController.text.trim();
+                  if (password.length < 6) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Şifre en az 6 karakter olmalı.')),
+                    );
+                    return;
+                  }
+                  if (password != confirmPasswordController.text.trim()) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Şifreler eşleşmiyor.')),
+                    );
+                    return;
+                  }
+                  
+                  context.read<AuthCubit>().updatePassword(password);
+                  Navigator.pop(context);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Şifre güncellendi.')),
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.accent,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Şifreyi Güncelle'),
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
@@ -194,17 +413,22 @@ class SettingsScreen extends StatelessWidget {
             context,
             icon: Icons.person,
             title: "Profil Bilgileri",
+            onTap: () => _showEditProfileBottomSheet(context),
           ),
           _buildSettingsTile(
             context,
             icon: Icons.lock_clock, // Using lock_clock or similar
             title: "Şifre Değiştir",
+            onTap: () => _showChangePasswordBottomSheet(context),
           ),
           _buildSettingsTile(
             context,
             icon: Icons.logout,
             title: "Çıkış Yap",
             iconColor: Colors.red,
+            onTap: () {
+              context.read<AuthCubit>().signOut();
+            },
           ),
 
           const SizedBox(height: 16),

@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import '../blocs/auth/auth_cubit.dart';
 import '../constants/colors.dart';
 import 'home_screen.dart';
 import 'live_tracking_screen.dart';
@@ -52,21 +54,40 @@ class _MainScreenState extends State<MainScreen> {
         title: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-             Text(
+            Text(
               "Hoş Geldiniz, ",
               style: TextStyle(
                 fontSize: 14,
-                fontWeight: FontWeight.w300, 
+                fontWeight: FontWeight.w300,
                 color: isDark ? Colors.white70 : Colors.white70,
               ),
             ),
-            Text(
-              "Ahmet Bey",
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: isDark ? Colors.white : Colors.white,
-              ),
+            BlocBuilder<AuthCubit, AuthState>(
+              builder: (context, state) {
+                String displayName = "Kullanıcı";
+                if (state is Authenticated) {
+                  final metadata = state.user.userMetadata ?? {};
+                  final firstName = metadata['first_name'] as String? ?? '';
+                  final gender = metadata['gender'] as String? ?? '';
+
+                  if (firstName.isNotEmpty) {
+                    displayName = firstName;
+                    if (gender == 'Erkek') {
+                      displayName += " Bey";
+                    } else if (gender == 'Kadın') {
+                      displayName += " Hanım";
+                    }
+                  }
+                }
+                return Text(
+                  displayName,
+                  style: TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: isDark ? Colors.white : Colors.white,
+                  ),
+                );
+              },
             ),
           ],
         ),
