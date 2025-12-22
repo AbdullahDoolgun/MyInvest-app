@@ -19,12 +19,16 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       final stocks = await repository.getAllStocks();
       final portfolio = await repository.getPortfolio();
       final favorites = await repository.getFavorites();
+      final bist30 = await repository.getBist30Stocks();
+      final participation = await repository.getParticipationStocks();
 
       emit(
         StockLoaded(
           allStocks: stocks,
           portfolioItems: portfolio,
           favoriteStocks: favorites,
+          bist30Stocks: bist30,
+          participationStocks: participation,
         ),
       );
     } catch (e) {

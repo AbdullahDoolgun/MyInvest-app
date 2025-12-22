@@ -42,6 +42,9 @@ class StockRepository {
   List<PortfolioItem> _portfolioItems = [];
   List<Stock> _favoriteStocks = [];
 
+  List<Stock> _bist30Stocks = [];
+  List<Stock> _participationStocks = [];
+
   StockRepository() {
     _init();
   }
@@ -71,6 +74,29 @@ class StockRepository {
       _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
       _allStocks.firstWhere((s) => s.symbol == "TUPRS"),
     ];
+    
+    // Mock BIST 30 Data (Subset of all stocks + new ones)
+    _bist30Stocks = [
+       _allStocks.firstWhere((s) => s.symbol == "GARAN"),
+       _allStocks.firstWhere((s) => s.symbol == "THYAO"),
+       _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
+       _allStocks.firstWhere((s) => s.symbol == "TUPRS"),
+       _allStocks.firstWhere((s) => s.symbol == "ASELS"),
+       _allStocks.firstWhere((s) => s.symbol == "EREGL"),
+       _allStocks.firstWhere((s) => s.symbol == "KCHOL"),
+       _allStocks.firstWhere((s) => s.symbol == "AKBNK"),
+       Stock(symbol: "SISE", name: "Şişecam", price: 48.20, changeRate: 1.10),
+       Stock(symbol: "SAHOL", name: "Sabancı Holding", price: 78.50, changeRate: -0.50),
+    ];
+
+    // Mock Participation Data
+    _participationStocks = [
+       _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
+       _allStocks.firstWhere((s) => s.symbol == "ASELS"),
+       _allStocks.firstWhere((s) => s.symbol == "EREGL"),
+       Stock(symbol: "FROTO", name: "Ford Otosan", price: 850.00, changeRate: 2.50),
+       Stock(symbol: "TOASO", name: "Tofaş", price: 245.50, changeRate: -1.10),
+    ];
   }
 
   // Simulate async operations
@@ -87,6 +113,16 @@ class StockRepository {
   Future<List<Stock>> getFavorites() async {
     await Future.delayed(const Duration(milliseconds: 50));
     return _favoriteStocks;
+  }
+  
+  Future<List<Stock>> getBist30Stocks() async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    return _bist30Stocks;
+  }
+
+  Future<List<Stock>> getParticipationStocks() async {
+    await Future.delayed(const Duration(milliseconds: 50));
+    return _participationStocks;
   }
 
   Future<void> addFavorite() async {

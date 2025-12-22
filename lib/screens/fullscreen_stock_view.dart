@@ -52,11 +52,14 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
     _displayStocks = [];
 
     // Sort base based on mode to have "real" ones first
+    // Sort base based on mode to have "real" ones first
     if (widget.mode == ViewMode.Risers) {
       baseStocks.sort((a, b) => b.changeRate.compareTo(a.changeRate));
     } else {
       baseStocks.sort((a, b) => a.changeRate.compareTo(b.changeRate));
     }
+
+    if (baseStocks.isEmpty) return; // Prevent crash if list is empty
 
     // Fill to 100
     for (int i = 0; i < 100; i++) {
@@ -93,15 +96,16 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
 
       setState(() {
         for (int i = 0; i < _displayStocks.length; i++) {
+          if (_displayStocks.isEmpty) break;
           var s = _displayStocks[i];
           double change = (random.nextDouble() - 0.5) * (s.price * 0.01);
           double newPrice = s.price + change;
 
           // Update flash color
           if (newPrice > s.price) {
-            _flashColors[s.symbol] = AppColors.up.withOpacity(0.3);
+            _flashColors[s.symbol] = AppColors.up.withValues(alpha: 0.3);
           } else if (newPrice < s.price) {
-            _flashColors[s.symbol] = AppColors.down.withOpacity(0.3);
+            _flashColors[s.symbol] = AppColors.down.withValues(alpha: 0.3);
           } else {
             _flashColors[s.symbol] = Colors.transparent;
           }
@@ -178,6 +182,9 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
           child: SafeArea(
             child: Column(
               children: [
+                if (_displayStocks.isEmpty)
+                  const Expanded(child: Center(child: Text("Görüntülenecek hisse yok", style: TextStyle(color: Colors.white))))
+                else
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
