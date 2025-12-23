@@ -11,6 +11,15 @@ class Stock {
     required this.changeRate,
   });
 
+  factory Stock.fromJson(Map<String, dynamic> json) {
+    return Stock(
+      symbol: (json['symbol'] as String).replaceFirst('.IS', ''),
+      name: json['shortName'] ?? json['symbol'],
+      price: (json['regularMarketPrice'] as num).toDouble(),
+      changeRate: (json['regularMarketChangePercent'] as num).toDouble(),
+    );
+  }
+
   bool get isUp => changeRate >= 0;
   String get changeString =>
       "${changeRate >= 0 ? '+' : ''}${changeRate.toStringAsFixed(2)}%";

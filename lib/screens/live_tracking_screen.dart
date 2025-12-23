@@ -3,75 +3,64 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../constants/colors.dart';
 
 import '../blocs/stock/stock_bloc.dart';
-import 'fullscreen_stock_view.dart';
+
 import '../models/stock_model.dart';
+
 
 class LiveTrackingScreen extends StatelessWidget {
   const LiveTrackingScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 3,
-      child: BlocBuilder<StockBloc, StockState>(
-        builder: (context, state) {
-          if (state is StockLoading) {
-            return const Center(child: CircularProgressIndicator());
-          }
+    return BlocBuilder<StockBloc, StockState>(
+      builder: (context, state) {
+        if (state is StockLoading) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-          if (state is StockLoaded) {
-            return Column(
+        if (state is StockLoaded) {
+          return SingleChildScrollView(
+            padding: const EdgeInsets.only(bottom: 80),
+            child: Column(
               children: [
-                Container(
-                  color: Theme.of(context).scaffoldBackgroundColor,
-                  child: TabBar(
-                    labelColor: AppColors.primary,
-                    unselectedLabelColor:
-                        Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
-                    indicatorColor: AppColors.primary,
-                    tabs: const [
-                      Tab(text: "BIST 30"),
-                      Tab(text: "BIST Katılım"),
-                      Tab(text: "Takip Listesi"),
-                    ],
-                  ),
+                _StockListSection(
+                  title: "BIST 100 Endeksi",
+                  indexValue: "9.150,25", // Mock Index Value
+                  indexChange: "+%2.10",
+                  stocks: state.allStocks, // Assuming allStocks is BIST 100
                 ),
-                Expanded(
-                  child: TabBarView(
-                    children: [
-                      _StockListSection(
-                        title: "BIST 30 Endeksi",
-                        indexValue: "9.150,25", // Mock Index Value
-                        indexChange: "+%2.10",
-                        stocks: state.bist30Stocks,
-                      ),
-                      _StockListSection(
-                        title: "BIST Katılım Endeksi",
-                        indexValue: "10.420,15", // Mock Index Value
-                        indexChange: "+%0.85",
-                        stocks: state.participationStocks,
-                      ),
-                      _StockListSection(
-                        title: "Takip Listem",
-                        indexValue: "", // No total for watchlist ideally, or sum
-                        indexChange: "",
-                        stocks: state.favoriteStocks,
-                         isWatchlist: true,
-                      ),
-                    ],
-                  ),
+                _StockListSection(
+                  title: "BIST 30 Endeksi",
+                  indexValue: "9.850,40", // Mock Index Value
+                  indexChange: "+%2.45",
+                  stocks: state.bist30Stocks,
+                ),
+                _StockListSection(
+                  title: "BIST Katılım Endeksi",
+                  indexValue: "10.420,15", // Mock Index Value
+                  indexChange: "+%0.85",
+                  stocks: state.participationStocks,
+                ),
+                _StockListSection(
+                  title: "Takip Listem",
+                  indexValue: "", 
+                  indexChange: "",
+                  stocks: state.favoriteStocks,
+                  isWatchlist: true,
                 ),
               ],
-            );
-          }
-          return const SizedBox();
-        },
-      ),
+            ),
+          );
+        }
+        return const SizedBox();
+      },
     );
   }
 }
 
-class _StockListSection extends StatelessWidget {
+enum SortType { none, risers, fallers }
+
+class _StockListSection extends StatefulWidget {
   final String title;
   final String indexValue;
   final String indexChange;
@@ -87,54 +76,39 @@ class _StockListSection extends StatelessWidget {
   });
 
   @override
+  State<_StockListSection> createState() => _StockListSectionState();
+}
+
+class _StockListSectionState extends State<_StockListSection> {
+  SortType _sortType = SortType.none;
+
+  List<Stock> get sortedStocks {
+    List<Stock> list = List.from(widget.stocks);
+    if (_sortType == SortType.risers) {
+      list.sort((a, b) => b.changeRate.compareTo(a.changeRate));
+    } else if (_sortType == SortType.fallers) {
+      list.sort((a, b) => a.changeRate.compareTo(b.changeRate));
+    }
+    return list;
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16.0),
+    // If watchlist is empty and it's the watchlist section, handle gracefully
+    if (widget.isWatchlist && widget.stocks.isEmpty) {
+        return Container(
+            padding: const EdgeInsets.all(16),
+            child: Center(child: Text("Takip listeniz boş", style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)))),
+        );
+    }
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Search Bar (Common)
-          Container(
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withValues(alpha: 0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
-                ),
-              ],
-            ),
-            child: TextField(
-              style: TextStyle(
-                color: Theme.of(context).colorScheme.onSurface,
-              ),
-              decoration: InputDecoration(
-                hintText: "Hisse Kodu veya Şirket Adı Ara...",
-                hintStyle: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-                prefixIcon: Icon(
-                  Icons.search,
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.5),
-                ),
-                border: InputBorder.none,
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Market Summary Card (Only if not generic watchlist, or customized)
-          if (!isWatchlist)
+          // Section Header
+          if (!widget.isWatchlist)
           Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
@@ -148,6 +122,7 @@ class _StockListSection extends StatelessWidget {
             ),
             child: Row(
               children: [
+                // Change Box (Left)
                 Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 12,
@@ -158,7 +133,7 @@ class _StockListSection extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Text(
-                    indexChange,
+                    widget.indexChange,
                     style: const TextStyle(
                       color: AppColors.up,
                       fontWeight: FontWeight.bold,
@@ -167,99 +142,84 @@ class _StockListSection extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 16),
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        color: Theme.of(
-                          context,
-                        ).colorScheme.onSurface.withValues(alpha: 0.7),
-                        fontSize: 12,
+                // Title & Value (Middle-Left)
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        widget.title,
+                        style: TextStyle(
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withValues(alpha: 0.7),
+                          fontSize: 12,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      indexValue,
-                      style: TextStyle(
+                      const SizedBox(height: 4),
+                      Text(
+                        widget.indexValue,
+                        style: TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                // Sorting Buttons (Right)
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                     _buildSortButton("En Çok Yükselen", SortType.risers, AppColors.up),
+                     const SizedBox(height: 8),
+                     _buildSortButton("En Çok Düşen", SortType.fallers, AppColors.down),
+                  ],
+                )
+              ],
+            ),
+          ) else
+            // Watchlist Header
+            Padding(
+                padding: const EdgeInsets.only(bottom: 8),
+                child: Text(
+                    widget.title,
+                    style: TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
                         color: Theme.of(context).colorScheme.onSurface,
-                      ),
                     ),
-                  ],
                 ),
-              ],
             ),
-          ),
-          
-          if(!isWatchlist)
-          const SizedBox(height: 24),
-
-          // Top Risers Link
-          _buildCategoryHeader(
-             context, 
-             "En Çok Yükselenler", 
-             Icons.trending_up, 
-             AppColors.up,
-             ViewMode.Risers
-          ),
           
           const SizedBox(height: 16),
 
-          // Top Fallers Link
-          _buildCategoryHeader(
-             context, 
-             "En Çok Düşenler", 
-             Icons.trending_down, 
-             AppColors.down,
-             ViewMode.Fallers
-          ),
-
-          const SizedBox(height: 24),
-
-          // List Header
+          // List Header (Optional, but good for clarity)
+          if(!widget.isWatchlist)
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                "HİSSELER",
-                style: TextStyle(
-                  color: Theme.of(
-                    context,
-                  ).colorScheme.onSurface.withValues(alpha: 0.7),
-                  fontWeight: FontWeight.bold,
+             mainAxisAlignment: MainAxisAlignment.spaceBetween,
+             children: [
+                Text(
+                  "HİSSELER",
+                   style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
+                      fontWeight: FontWeight.bold,
+                   ),
                 ),
-              ),
-              Row(
-                children: [
-                  Icon(
-                    Icons.sort,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 20,
-                  ),
-                   const SizedBox(width: 16),
-                  Icon(
-                    Icons.filter_list,
-                    color: Theme.of(
-                      context,
-                    ).colorScheme.onSurface.withValues(alpha: 0.7),
-                    size: 20,
-                  ),
-                ],
-              ),
-            ],
+                 // Reset Sort Button (Optional)
+                if (_sortType != SortType.none)
+                   GestureDetector(
+                       onTap: () => setState(() => _sortType = SortType.none),
+                       child: Text("Sıfırla", style: TextStyle(color: AppColors.primary, fontSize: 12)),
+                   ),
+             ],
           ),
+          
+          if(!widget.isWatchlist)
           const SizedBox(height: 12),
 
-          // Stocks Grid
-          if (stocks.isEmpty)
-             const Center(child: Text("Liste boş")),
-          
-          if (stocks.isNotEmpty)
+          // Grid of Stocks
           GridView.builder(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
@@ -269,9 +229,9 @@ class _StockListSection extends StatelessWidget {
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
             ),
-            itemCount: stocks.length,
+            itemCount: sortedStocks.length,
             itemBuilder: (context, index) {
-              final stock = stocks[index];
+              final stock = sortedStocks[index];
               return _GridStockCard(
                 symbol: stock.symbol,
                 name: stock.name,
@@ -281,57 +241,37 @@ class _StockListSection extends StatelessWidget {
               );
             },
           ),
-           const SizedBox(height: 80),
+          const SizedBox(height: 24),
+          const Divider(),
         ],
       ),
     );
   }
 
-  Widget _buildCategoryHeader(BuildContext context, String title, IconData icon, Color color, ViewMode mode) {
-      return InkWell(
-        onTap: () {
-           // Filter and sort based on mode for *this specific list* generally, 
-           // but for now we pass the whole list or the specific subsection to the detailed view.
-           // The user requirement implies clicking this opens a "full screen" view of these specific items sorted.
-           
-           // We will pass 'stocks' (current tab's stocks) to the FullScreenView
-           Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (_) => FullScreenStockView(
-                allStocks: stocks, // Pass only the stocks in this tab!
-                mode: mode,
-              ),
-            ),
-          );
-        },
-        child: Row(
-          children: [
-             Container(
-               padding: const EdgeInsets.all(8),
-               decoration: BoxDecoration(
-                 color: color.withValues(alpha: 0.1),
-                 shape: BoxShape.circle,
-               ),
-               child: Icon(icon, color: color, size: 20),
+  Widget _buildSortButton(String text, SortType type, Color color) {
+      final isSelected = _sortType == type;
+      return GestureDetector(
+          onTap: () {
+              setState(() {
+                  _sortType = (isSelected) ? SortType.none : type;
+              });
+          },
+          child: Container(
+             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+             decoration: BoxDecoration(
+                 color: isSelected ? color : Colors.transparent,
+                 borderRadius: BorderRadius.circular(4),
+                 border: Border.all(color: color),
              ),
-             const SizedBox(width: 12),
-             Text(
-               title,
-               style: TextStyle(
-                 fontSize: 16,
-                 fontWeight: FontWeight.bold,
-                 color: Theme.of(context).colorScheme.onSurface,
-               ),
+             child: Text(
+                 text,
+                 style: TextStyle(
+                     fontSize: 10,
+                     fontWeight: FontWeight.bold,
+                     color: isSelected ? Colors.white : color,
+                 ),
              ),
-             const Spacer(),
-             Icon(
-               Icons.arrow_forward_ios, 
-               size: 14, 
-               color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)
-             ),
-          ],
-        ),
+          ),
       );
   }
 }
@@ -357,7 +297,7 @@ class _GridStockCard extends StatelessWidget {
     final colorScheme = theme.colorScheme;
 
     return Container(
-      padding: const EdgeInsets.all(12),
+      padding: const EdgeInsets.all(10), // Reduced from 12
       decoration: BoxDecoration(
         color: theme.cardColor,
         borderRadius: BorderRadius.circular(12),
@@ -372,7 +312,6 @@ class _GridStockCard extends StatelessWidget {
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -382,18 +321,20 @@ class _GridStockCard extends StatelessWidget {
                 height: 32,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: colorScheme.surface, // Adjust if needed for contrast
+                  color: colorScheme.surface, 
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: colorScheme.outline.withValues(alpha: 0.1),
                   ),
                 ),
-                child: Text(
-                  symbol.substring(0, symbol.length > 2 ? 2 : symbol.length),
-                  style: TextStyle(
-                    fontWeight: FontWeight.bold,
-                    fontSize: 10,
-                    color: colorScheme.onSurface,
+                child: FittedBox(
+                  child: Text(
+                    symbol.substring(0, symbol.length > 2 ? 2 : symbol.length),
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 10,
+                      color: colorScheme.onSurface,
+                    ),
                   ),
                 ),
               ),
@@ -425,7 +366,7 @@ class _GridStockCard extends StatelessWidget {
               ),
             ],
           ),
-          const Spacer(),
+          const Spacer(), // Keeps using spacer but with more room due to less padding
           Text(
             symbol,
             style: TextStyle(
@@ -444,12 +385,16 @@ class _GridStockCard extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
           const SizedBox(height: 4),
-          Text(
-            price,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-              color: colorScheme.onSurface,
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              price,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 16,
+                color: colorScheme.onSurface,
+              ),
             ),
           ),
         ],

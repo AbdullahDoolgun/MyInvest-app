@@ -254,7 +254,7 @@ class SettingsScreen extends StatelessWidget {
                       Expanded(
                         flex: 2,
                         child: DropdownButtonFormField<String>(
-                          value: selectedGender,
+                          initialValue: selectedGender,
                           decoration: const InputDecoration(labelText: 'Cinsiyet'),
                           items: genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
                           onChanged: (val) {

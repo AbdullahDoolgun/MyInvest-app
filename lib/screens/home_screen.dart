@@ -4,6 +4,7 @@ import '../constants/colors.dart';
 import '../widgets/stock_card.dart';
 import '../blocs/stock/stock_bloc.dart';
 import '../blocs/settings/settings_cubit.dart';
+import '../widgets/stock_selection_sheet.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -128,7 +129,7 @@ class HomeScreen extends StatelessWidget {
                                     decoration: BoxDecoration(
                                       color: Theme.of(
                                         context,
-                                      ).colorScheme.onPrimary.withOpacity(0.2),
+                                      ).colorScheme.onPrimary.withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
@@ -217,7 +218,7 @@ class HomeScreen extends StatelessWidget {
                         color: AppColors.accent,
                       ),
                       onPressed: () {
-                        context.read<StockBloc>().add(AddFavoriteStock());
+                        _showAddFavoriteSheet(context);
                       },
                     ),
                   ],
@@ -245,6 +246,29 @@ class HomeScreen extends StatelessWidget {
         }
         return const SizedBox();
       },
+    );
+  }
+
+  void _showAddFavoriteSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BlocBuilder<StockBloc, StockState>(
+        builder: (context, state) {
+          if (state is StockLoaded) {
+            return StockSelectionSheet(
+              allStocks: state.allStocks,
+              title: "Favorilere Ekle",
+              onStockSelected: (stock) {
+                 Navigator.pop(context);
+                 context.read<StockBloc>().add(AddFavoriteStock(stock.symbol));
+              },
+            );
+          }
+           return const Center(child: CircularProgressIndicator());
+        },
+      ),
     );
   }
 }

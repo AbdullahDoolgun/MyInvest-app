@@ -3,12 +3,12 @@ import 'package:flutter/services.dart';
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/rendering.dart';
-import 'dart:ui' as ui;
+
 import '../constants/colors.dart';
 import '../models/stock_model.dart';
-import '../data/stock_repository.dart';
 
-enum ViewMode { Risers, Fallers }
+
+enum ViewMode { risers, fallers }
 
 class FullScreenStockView extends StatefulWidget {
   final List<Stock> allStocks;
@@ -33,8 +33,8 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
   // Settings
   int _itemCount = 10;
   // Track previous prices to determine flash color
-  Map<String, double> _prevPrices = {};
-  Map<String, Color> _flashColors = {};
+  final Map<String, double> _prevPrices = {};
+  final Map<String, Color> _flashColors = {};
 
   @override
   void initState() {
@@ -53,7 +53,7 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
 
     // Sort base based on mode to have "real" ones first
     // Sort base based on mode to have "real" ones first
-    if (widget.mode == ViewMode.Risers) {
+    if (widget.mode == ViewMode.risers) {
       baseStocks.sort((a, b) => b.changeRate.compareTo(a.changeRate));
     } else {
       baseStocks.sort((a, b) => a.changeRate.compareTo(b.changeRate));
@@ -67,7 +67,7 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
 
       // Vary the template slightly so they aren't identical
       double priceVar = 1.0 + (Random().nextDouble() - 0.5) * 0.1;
-      double changeVar = widget.mode == ViewMode.Risers
+      double changeVar = widget.mode == ViewMode.risers
           ? Random().nextDouble() * 5
           : -Random().nextDouble() * 5;
 
@@ -224,8 +224,9 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
                           childAspectRatio: childAspectRatio,
                         ),
                         itemBuilder: (context, index) {
-                          if (index >= _displayStocks.length)
+                          if (index >= _displayStocks.length) {
                             return const SizedBox();
+                          }
                           final stock = _displayStocks[index];
                           final color =
                               _flashColors[stock.symbol] ?? Colors.transparent;

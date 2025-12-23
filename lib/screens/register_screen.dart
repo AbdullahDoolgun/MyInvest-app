@@ -149,7 +149,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       Expanded(
                         flex: 2,
                         child: DropdownButtonFormField<String>(
-                          value: _selectedGender,
+                          initialValue: _selectedGender,
                           decoration: InputDecoration(
                             labelText: 'Cinsiyet',
                             prefixIcon: const Icon(Icons.people_outline),

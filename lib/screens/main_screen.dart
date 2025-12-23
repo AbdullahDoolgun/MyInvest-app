@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/auth/auth_cubit.dart';
+import '../blocs/stock/stock_bloc.dart'; // Add
 import '../constants/colors.dart';
+import '../widgets/stock_selection_sheet.dart';
 import 'home_screen.dart';
 import 'live_tracking_screen.dart';
 import 'portfolio_screen.dart';
@@ -104,7 +106,11 @@ class _MainScreenState extends State<MainScreen> {
       body: _isSettingsOpen ? const SettingsScreen() : _pages[_selectedIndex],
       floatingActionButton: showFab
           ? FloatingActionButton(
-              onPressed: () {},
+              onPressed: () {
+                if (_selectedIndex == 2) {
+                   _showAddStockSheet(context);
+                }
+              },
               backgroundColor: AppColors.primary,
               child: const Icon(Icons.add, color: Colors.white),
             )
@@ -128,6 +134,80 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Portföy',
+          ),
+        ],
+      ),
+    );
+  }
+
+
+  void _showAddStockSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => BlocBuilder<StockBloc, StockState>(
+        builder: (context, state) {
+          if (state is StockLoaded) {
+            return StockSelectionSheet(
+              allStocks: state.allStocks,
+              title: "Portföye Ekle",
+              onStockSelected: (stock) {
+                Navigator.pop(context);
+                _showStockDetailsDialog(context, stock.symbol);
+              },
+            );
+          }
+          return const Center(child: CircularProgressIndicator());
+        },
+      ),
+    );
+  }
+
+  void _showStockDetailsDialog(BuildContext context, String symbol) {
+    final quantityController = TextEditingController();
+    final costController = TextEditingController();
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("$symbol Ekle"),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: quantityController,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: "Adet"),
+            ),
+            TextField(
+              controller: costController,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: "Ortalama Maliyet"),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("İptal"),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              final quantity = int.tryParse(quantityController.text) ?? 0;
+              final cost = double.tryParse(costController.text) ?? 0.0;
+              if (quantity > 0 && cost > 0) {
+                context.read<StockBloc>().add(
+                      AddPortfolioStock(
+                        symbol: symbol,
+                        quantity: quantity,
+                        cost: cost,
+                      ),
+                    );
+                Navigator.pop(context);
+              }
+            },
+            child: const Text("Ekle"),
           ),
         ],
       ),

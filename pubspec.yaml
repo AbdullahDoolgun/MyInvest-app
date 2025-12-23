@@ -12,6 +12,7 @@ dependencies:
   flutter:
     sdk: flutter
   flutter_bloc: ^9.1.1
+  http: ^1.6.0
   supabase_flutter: ^1.10.0
 
 dev_dependencies:

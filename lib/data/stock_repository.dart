@@ -1,136 +1,152 @@
 import '../models/stock_model.dart';
+import 'yahoo_finance_service.dart';
 import 'dart:async';
 
 class StockRepository {
-  // All Stocks Database
-  final List<Stock> _allStocks = [
-    Stock(
-      symbol: "GARAN",
-      name: "Garanti Bankası",
-      price: 108.50,
-      changeRate: 2.15,
-    ),
-    Stock(
-      symbol: "THYAO",
-      name: "Türk Hava Yolları",
-      price: 298.75,
-      changeRate: -0.85,
-    ),
-    Stock(
-      symbol: "BIMAS",
-      name: "BİM Mağazalar",
-      price: 495.25,
-      changeRate: 3.10,
-    ),
-    Stock(symbol: "TUPRS", name: "Tüpraş", price: 180.60, changeRate: -1.20),
-    Stock(symbol: "ASELS", name: "Aselsan", price: 42.10, changeRate: 0.45),
-    Stock(
-      symbol: "EREGL",
-      name: "Ereğli Demir Çelik",
-      price: 41.80,
-      changeRate: -7.52,
-    ),
-    Stock(
-      symbol: "KCHOL",
-      name: "Koç Holding",
-      price: 140.00,
-      changeRate: 1.50,
-    ),
-    Stock(symbol: "AKBNK", name: "Akbank", price: 30.20, changeRate: 0.90),
+  final YahooFinanceService _yahooService = YahooFinanceService();
+
+  // Symbols to track (Expanded List)
+  final List<String> _allStockSymbols = [
+    "GARAN", "THYAO", "BIMAS", "TUPRS", "ASELS", "EREGL", "KCHOL", "AKBNK", "SISE", "SAHOL",
+    "FROTO", "TOASO", "SASA", "HEKTS", "YKBNK", "ISCTR", "DOAS", "KONTR", "SMRTG", "EUPWR",
+    "ASTOR", "ODAS", "PETKM", "TCELL", "TTKOM", "ENKAI", "BIST30", "XU100"
   ];
 
-  List<PortfolioItem> _portfolioItems = [];
-  List<Stock> _favoriteStocks = [];
+  final List<String> _bist30Symbols = [
+    "GARAN", "THYAO", "BIMAS", "TUPRS", "ASELS", "EREGL", "KCHOL", "AKBNK", "SISE", "SAHOL",
+    "FROTO", "TOASO", "SASA", "HEKTS", "YKBNK", "ISCTR", "DOAS", "PETKM", "TCELL", "TTKOM"
+  ];
 
-  List<Stock> _bist30Stocks = [];
-  List<Stock> _participationStocks = [];
+  final List<String> _participationSymbols = [
+    "BIMAS", "ASELS", "EREGL", "FROTO", "TOASO", "KONTR", "SMRTG", "EUPWR", "ASTOR"
+  ];
 
-  StockRepository() {
-    _init();
+  // Portfolio Data Configuration (Mock database for portfolio holdings)
+  final List<Map<String, dynamic>> _portfolioConfig = [
+    {
+      "symbol": "GARAN",
+      "quantity": 1500,
+      "averageCost": 108.50,
+      "weeklyRec": "AL",
+      "monthlyRec": "NÖTR",
+      "threeMonthlyRec": "AL"
+    },
+    {
+      "symbol": "THYAO",
+      "quantity": 450,
+      "averageCost": 298.75,
+      "weeklyRec": "SAT",
+      "monthlyRec": "NÖTR",
+      "threeMonthlyRec": "AL"
+    }
+  ];
+
+  final List<String> _favoriteSymbols = ["BIMAS", "TUPRS", "SASA", "HEKTS"];
+
+  StockRepository();
+
+  Future<List<Stock>> _fetchOrMock(List<String> symbols) async {
+    try {
+      final stocks = await _yahooService.getQuotes(symbols);
+      if (stocks.isNotEmpty) return stocks;
+    } catch (e) {
+      // Fallback
+    }
+    return _generateMockStocks(symbols);
   }
 
-  void _init() {
-    // Initial Data
-    _portfolioItems = [
-      PortfolioItem(
-        stock: _allStocks.firstWhere((s) => s.symbol == "GARAN"),
-        quantity: 1500,
-        averageCost: 108.50,
-        weeklyRec: "AL",
-        monthlyRec: "NÖTR",
-        threeMonthlyRec: "AL",
-      ),
-      PortfolioItem(
-        stock: _allStocks.firstWhere((s) => s.symbol == "THYAO"),
-        quantity: 450,
-        averageCost: 298.75,
-        weeklyRec: "SAT",
-        monthlyRec: "NÖTR",
-        threeMonthlyRec: "AL",
-      ),
-    ];
-
-    _favoriteStocks = [
-      _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
-      _allStocks.firstWhere((s) => s.symbol == "TUPRS"),
-    ];
-    
-    // Mock BIST 30 Data (Subset of all stocks + new ones)
-    _bist30Stocks = [
-       _allStocks.firstWhere((s) => s.symbol == "GARAN"),
-       _allStocks.firstWhere((s) => s.symbol == "THYAO"),
-       _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
-       _allStocks.firstWhere((s) => s.symbol == "TUPRS"),
-       _allStocks.firstWhere((s) => s.symbol == "ASELS"),
-       _allStocks.firstWhere((s) => s.symbol == "EREGL"),
-       _allStocks.firstWhere((s) => s.symbol == "KCHOL"),
-       _allStocks.firstWhere((s) => s.symbol == "AKBNK"),
-       Stock(symbol: "SISE", name: "Şişecam", price: 48.20, changeRate: 1.10),
-       Stock(symbol: "SAHOL", name: "Sabancı Holding", price: 78.50, changeRate: -0.50),
-    ];
-
-    // Mock Participation Data
-    _participationStocks = [
-       _allStocks.firstWhere((s) => s.symbol == "BIMAS"),
-       _allStocks.firstWhere((s) => s.symbol == "ASELS"),
-       _allStocks.firstWhere((s) => s.symbol == "EREGL"),
-       Stock(symbol: "FROTO", name: "Ford Otosan", price: 850.00, changeRate: 2.50),
-       Stock(symbol: "TOASO", name: "Tofaş", price: 245.50, changeRate: -1.10),
-    ];
-  }
-
-  // Simulate async operations
   Future<List<Stock>> getAllStocks() async {
-    await Future.delayed(const Duration(milliseconds: 50)); // Simluate delay
-    return _allStocks;
+    return await _fetchOrMock(_allStockSymbols);
   }
 
   Future<List<PortfolioItem>> getPortfolio() async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    return _portfolioItems;
+    final symbols = _portfolioConfig.map((e) => e['symbol'] as String).toList();
+    final stocks = await _fetchOrMock(symbols);
+    
+    List<PortfolioItem> portfolioItems = [];
+    
+    for (var config in _portfolioConfig) {
+      final stockIndex = stocks.indexWhere((s) => s.symbol == config['symbol']);
+      if (stockIndex != -1) {
+        portfolioItems.add(PortfolioItem(
+          stock: stocks[stockIndex],
+          quantity: config['quantity'],
+          averageCost: config['averageCost'],
+          weeklyRec: config['weeklyRec'],
+          monthlyRec: config['monthlyRec'],
+          threeMonthlyRec: config['threeMonthlyRec'],
+        ));
+      } else {
+        // Create a mock stock if not found
+        final mockStock = Stock(
+          symbol: config['symbol'],
+          name: "${config['symbol']} A.Ş.",
+          price: config['averageCost'] * 1.1, // Mock current price
+          changeRate: 1.5,
+        );
+         portfolioItems.add(PortfolioItem(
+          stock: mockStock,
+          quantity: config['quantity'],
+          averageCost: config['averageCost'],
+          weeklyRec: config['weeklyRec'],
+          monthlyRec: config['monthlyRec'],
+          threeMonthlyRec: config['threeMonthlyRec'],
+        ));
+      }
+    }
+    return portfolioItems;
   }
 
   Future<List<Stock>> getFavorites() async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    return _favoriteStocks;
+    return await _fetchOrMock(_favoriteSymbols);
   }
   
   Future<List<Stock>> getBist30Stocks() async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    return _bist30Stocks;
+    return await _fetchOrMock(_bist30Symbols);
   }
 
   Future<List<Stock>> getParticipationStocks() async {
-    await Future.delayed(const Duration(milliseconds: 50));
-    return _participationStocks;
+    return await _fetchOrMock(_participationSymbols);
   }
 
-  Future<void> addFavorite() async {
-    for (var stock in _allStocks) {
-      if (!_favoriteStocks.contains(stock)) {
-        _favoriteStocks.add(stock);
-        break; // Add only one
-      }
+  Future<void> addToPortfolio(String symbol, int quantity, double cost) async {
+    _portfolioConfig.add({
+      "symbol": symbol,
+      "quantity": quantity,
+      "averageCost": cost,
+      "weeklyRec": "NÖTR",
+      "monthlyRec": "NÖTR",
+      "threeMonthlyRec": "NÖTR"
+    });
+  }
+
+  Future<void> addFavorite(String symbol) async {
+    if (!_favoriteSymbols.contains(symbol)) {
+      _favoriteSymbols.add(symbol);
     }
+  }
+
+  // Fallback Generation
+  List<Stock> _generateMockStocks(List<String> symbols) {
+    // Realistic mock data
+    final Map<String, double> mockPrices = {
+      "GARAN": 105.4, "THYAO": 270.5, "BIMAS": 480.0, "TUPRS": 160.2, "ASELS": 60.5,
+      "EREGL": 45.3, "KCHOL": 200.1, "AKBNK": 55.4, "SISE": 48.7, "SAHOL": 85.0,
+      "FROTO": 1020.0, "TOASO": 250.5, "SASA": 42.1, "HEKTS": 15.3, "YKBNK": 28.9,
+      "ISCTR": 12.5, "DOAS": 280.0, "KONTR": 230.5, "SMRTG": 55.0, "EUPWR": 140.0,
+      "ASTOR": 95.5, "ODAS": 9.8, "PETKM": 22.4, "TCELL": 75.0, "TTKOM": 35.0,
+      "ENKAI": 38.5, "BIST30": 10250.0, "XU100": 9150.0
+    };
+
+    return symbols.map((symbol) {
+      double price = mockPrices[symbol] ?? (10.0 + (symbol.length * 5.0));
+      
+      return Stock(
+        symbol: symbol,
+        name: "$symbol A.Ş.", // Removed (Mock) suffix
+        price: price,
+        changeRate: (symbol.hashCode % 200 - 100) / 100.0 * 5.0, 
+      );
+    }).toList();
   }
 }

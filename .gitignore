@@ -60,3 +60,4 @@ secrets.yml
 *.key
 *.pem
 
+#flutter gitignore bak eksik var mı

@@ -1,31 +1,31 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:equatable/equatable.dart';
 
-enum AppCurrency { TRY, USD, EUR, Gold }
+enum AppCurrency { turkishLira, usd, eur, gold }
 
 extension AppCurrencyExtension on AppCurrency {
   String get label {
     switch (this) {
-      case AppCurrency.TRY:
+      case AppCurrency.turkishLira:
         return 'Türk Lirası (₺)';
-      case AppCurrency.USD:
+      case AppCurrency.usd:
         return 'Amerikan Doları (\$)';
-      case AppCurrency.EUR:
+      case AppCurrency.eur:
         return 'Euro (€)';
-      case AppCurrency.Gold:
+      case AppCurrency.gold:
         return 'Gram Altın (gr)';
     }
   }
 
   String get symbol {
     switch (this) {
-      case AppCurrency.TRY:
+      case AppCurrency.turkishLira:
         return '₺';
-      case AppCurrency.USD:
+      case AppCurrency.usd:
         return '\$';
-      case AppCurrency.EUR:
+      case AppCurrency.eur:
         return '€';
-      case AppCurrency.Gold:
+      case AppCurrency.gold:
         return 'gr';
     }
   }
@@ -33,13 +33,13 @@ extension AppCurrencyExtension on AppCurrency {
   // Mock exchange rates
   double get rateToTry {
     switch (this) {
-      case AppCurrency.TRY:
+      case AppCurrency.turkishLira:
         return 1.0;
-      case AppCurrency.USD:
+      case AppCurrency.usd:
         return 35.05; // Mock rate
-      case AppCurrency.EUR:
+      case AppCurrency.eur:
         return 36.50; // Mock rate
-      case AppCurrency.Gold:
+      case AppCurrency.gold:
         return 2450.0; // Mock rate
     }
   }
@@ -57,7 +57,7 @@ extension AppCurrencyExtension on AppCurrency {
     
     String formattedValue = '$wholePart,$decimalPart';
 
-    if (this == AppCurrency.Gold) {
+    if (this == AppCurrency.gold) {
       return '$formattedValue gr';
     }
     return '$symbol$formattedValue';
@@ -67,7 +67,7 @@ extension AppCurrencyExtension on AppCurrency {
 class SettingsState extends Equatable {
   final AppCurrency currency;
 
-  const SettingsState({this.currency = AppCurrency.TRY});
+  const SettingsState({this.currency = AppCurrency.turkishLira});
 
   SettingsState copyWith({AppCurrency? currency}) {
     return SettingsState(
