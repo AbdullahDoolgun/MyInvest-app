@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'constants/colors.dart';
@@ -14,30 +15,43 @@ import 'blocs/auth/auth_cubit.dart';
 import 'widgets/auth_gate.dart';
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  runZonedGuarded(
+    () async {
+      WidgetsFlutterBinding.ensureInitialized();
 
-  await Supabase.initialize(
-    url: AppSecrets.supabaseUrl,
-    anonKey: AppSecrets.supabaseAnonKey,
-  );
+      try {
+        await Supabase.initialize(
+          url: AppSecrets.supabaseUrl,
+          anonKey: AppSecrets.supabaseAnonKey,
+        );
+      } catch (e) {
+        debugPrint("Supabase Init Error: $e");
+        // Continue anyway, repository will handle missing Supabase gracefully
+      }
 
-  SystemChrome.setSystemUIOverlayStyle(
-    const SystemUiOverlayStyle(
-      statusBarColor: AppColors.primary,
-      statusBarIconBrightness: Brightness.light,
-    ),
-  );
+      SystemChrome.setSystemUIOverlayStyle(
+        const SystemUiOverlayStyle(
+          statusBarColor: AppColors.primary,
+          statusBarIconBrightness: Brightness.light,
+        ),
+      );
 
-  final stockRepository = StockRepository();
-  final authRepository = SupabaseAuthRepository();
-  final portfolioRepository = SupabasePortfolioRepository();
+      final stockRepository = StockRepository();
+      final authRepository = SupabaseAuthRepository();
+      final portfolioRepository = SupabasePortfolioRepository();
 
-  runApp(
-    MainApp(
-      stockRepository: stockRepository,
-      authRepository: authRepository,
-      portfolioRepository: portfolioRepository,
-    ),
+      runApp(
+        MainApp(
+          stockRepository: stockRepository,
+          authRepository: authRepository,
+          portfolioRepository: portfolioRepository,
+        ),
+      );
+    },
+    (error, stack) {
+      debugPrint("Global Error: $error");
+      debugPrint(stack.toString());
+    },
   );
 }
 

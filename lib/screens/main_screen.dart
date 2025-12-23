@@ -9,6 +9,8 @@ import 'live_tracking_screen.dart';
 import 'portfolio_screen.dart';
 import 'settings_screen.dart';
 
+import 'dart:async'; // Add this
+
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
 
@@ -19,12 +21,36 @@ class MainScreen extends StatefulWidget {
 class _MainScreenState extends State<MainScreen> {
   int _selectedIndex = 0;
   bool _isSettingsOpen = false;
+  Timer? _refreshTimer;
 
   final List<Widget> _pages = const [
     HomeScreen(),
     LiveTrackingScreen(),
     PortfolioScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    _startTimer();
+  }
+
+  @override
+  void dispose() {
+    _refreshTimer?.cancel();
+    super.dispose();
+  }
+
+  void _startTimer() {
+    _refreshTimer?.cancel();
+    final duration = (_selectedIndex == 1) ? 5 : 30;
+    
+    _refreshTimer = Timer.periodic(Duration(seconds: duration), (timer) {
+      if (mounted) {
+        context.read<StockBloc>().add(RefreshStocks());
+      }
+    });
+  }
 
   void _openSettings() {
     setState(() {
@@ -37,6 +63,7 @@ class _MainScreenState extends State<MainScreen> {
       _selectedIndex = index;
       _isSettingsOpen = false;
     });
+    _startTimer();
   }
 
   @override
