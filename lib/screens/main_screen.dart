@@ -44,9 +44,10 @@ class _MainScreenState extends State<MainScreen> {
   void _startTimer() {
     _refreshTimer?.cancel();
     final duration = (_selectedIndex == 1) ? 5 : 30;
-    
+
     _refreshTimer = Timer.periodic(Duration(seconds: duration), (timer) {
       if (mounted) {
+        debugPrint("Timer Tick: Requesting Refresh (Interval: $duration s)");
         context.read<StockBloc>().add(RefreshStocks());
       }
     });
@@ -135,7 +136,7 @@ class _MainScreenState extends State<MainScreen> {
           ? FloatingActionButton(
               onPressed: () {
                 if (_selectedIndex == 2) {
-                   _showAddStockSheet(context);
+                  _showAddStockSheet(context);
                 }
               },
               backgroundColor: AppColors.primary,
@@ -166,7 +167,6 @@ class _MainScreenState extends State<MainScreen> {
       ),
     );
   }
-
 
   void _showAddStockSheet(BuildContext context) {
     showModalBottomSheet(
@@ -209,7 +209,9 @@ class _MainScreenState extends State<MainScreen> {
             ),
             TextField(
               controller: costController,
-              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              keyboardType: const TextInputType.numberWithOptions(
+                decimal: true,
+              ),
               decoration: const InputDecoration(labelText: "Ortalama Maliyet"),
             ),
           ],
@@ -225,12 +227,12 @@ class _MainScreenState extends State<MainScreen> {
               final cost = double.tryParse(costController.text) ?? 0.0;
               if (quantity > 0 && cost > 0) {
                 context.read<StockBloc>().add(
-                      AddPortfolioStock(
-                        symbol: symbol,
-                        quantity: quantity,
-                        cost: cost,
-                      ),
-                    );
+                  AddPortfolioStock(
+                    symbol: symbol,
+                    quantity: quantity,
+                    cost: cost,
+                  ),
+                );
                 Navigator.pop(context);
               }
             },

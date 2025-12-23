@@ -63,7 +63,11 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   ) async {
     if (state is StockLoaded) {
       try {
-        await repository.addToPortfolio(event.symbol, event.quantity, event.cost);
+        await repository.addToPortfolio(
+          event.symbol,
+          event.quantity,
+          event.cost,
+        );
         // Reload data
         final portfolio = await repository.getPortfolio();
         final currentState = state as StockLoaded;
@@ -73,7 +77,11 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       }
     }
   }
-  Future<void> _onRefreshStocks(RefreshStocks event, Emitter<StockState> emit) async {
+
+  Future<void> _onRefreshStocks(
+    RefreshStocks event,
+    Emitter<StockState> emit,
+  ) async {
     // Quietly update data without changing state to Loading
     if (state is StockLoaded) {
       try {
@@ -90,12 +98,15 @@ class StockBloc extends Bloc<StockEvent, StockState> {
             favoriteStocks: favorites,
             bist30Stocks: bist30,
             participationStocks: participation,
+            lastUpdated: DateTime.now(),
           ),
         );
       } catch (e) {
         // Silently fail or log, don't disrupt user
         debugPrint("Quiet Refresh Failed: $e");
       }
+    } else {
+      debugPrint("Skipping Refresh: State is not StockLoaded");
     }
   }
 }

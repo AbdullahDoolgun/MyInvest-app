@@ -4,7 +4,7 @@ class SupabaseAuthRepository {
   final SupabaseClient _supabase;
 
   SupabaseAuthRepository({SupabaseClient? supabase})
-      : _supabase = supabase ?? Supabase.instance.client;
+    : _supabase = supabase ?? Supabase.instance.client;
 
   Future<void> signIn({required String email, required String password}) async {
     await _supabase.auth.signInWithPassword(email: email, password: password);
@@ -56,9 +56,7 @@ class SupabaseAuthRepository {
   }
 
   Future<void> updatePassword(String newPassword) async {
-    await _supabase.auth.updateUser(UserAttributes(
-      password: newPassword,
-    ));
+    await _supabase.auth.updateUser(UserAttributes(password: newPassword));
   }
 
   Future<void> signOut() async {
