@@ -26,6 +26,27 @@ class StockLoaded extends StockState {
     this.lastUpdated,
   });
 
+  double get totalCurrentValue {
+    // Sum of quantity * current price for all items
+    return portfolioItems.fold(0, (sum, item) {
+      return sum + (item.quantity * item.stock.price);
+    });
+  }
+
+  double get totalCost {
+    // Sum of quantity * average cost for all items
+    return portfolioItems.fold(0, (sum, item) {
+      return sum + (item.quantity * item.averageCost);
+    });
+  }
+
+  double get totalProfitLoss => totalCurrentValue - totalCost;
+
+  double get totalProfitLossRate {
+    if (totalCost == 0) return 0;
+    return (totalProfitLoss / totalCost) * 100;
+  }
+
   @override
   List<Object?> get props => [
     allStocks,

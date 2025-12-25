@@ -83,18 +83,26 @@ class HomeScreen extends StatelessWidget {
                   ),
                   child: BlocBuilder<SettingsCubit, SettingsState>(
                     builder: (context, settingsState) {
-                      const double basePortfolioValue = 158245.50;
-                      const double baseProfitValue = 12540.20;
+                      // Real values from StockBloc state
+                      double portfolioValueInTry = state.totalCurrentValue;
+                      double profitValueInTry = state.totalProfitLoss;
+                      double profitRate = state.totalProfitLossRate;
 
-                      double convertedPortfolio =
-                          basePortfolioValue / settingsState.currency.rateToTry;
-                      double convertedProfit =
-                          baseProfitValue / settingsState.currency.rateToTry;
+                      // Convert to selected currency
+                      double displayPortfolioValue =
+                          portfolioValueInTry /
+                          settingsState.currency.rateToTry;
+                      double displayProfitValue =
+                          profitValueInTry / settingsState.currency.rateToTry;
 
-                      // Use NumberFormat ideally, but toStringAsFixed(2) is fine for now
-                      // Adding commas would be better but requires intl package or custom logic
-                      String pValue = settingsState.currency.format(convertedPortfolio);
-                      String profitValue = "+${settingsState.currency.format(convertedProfit)}";
+                      String pValue = settingsState.currency.format(
+                        displayPortfolioValue,
+                      );
+                      String pProfit = settingsState.currency.format(
+                        displayProfitValue.abs(),
+                      );
+                      String profitString =
+                          "${displayProfitValue >= 0 ? '+' : '-'}$pProfit";
 
                       return Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -127,22 +135,29 @@ class HomeScreen extends StatelessWidget {
                                   Container(
                                     padding: const EdgeInsets.all(4),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onPrimary.withValues(alpha: 0.2),
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .onPrimary
+                                          .withValues(alpha: 0.2),
                                       shape: BoxShape.circle,
                                     ),
                                     child: Icon(
-                                      Icons.show_chart,
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      displayProfitValue >= 0
+                                          ? Icons.trending_up
+                                          : Icons.trending_down,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
                                       size: 16,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    profitValue,
+                                    profitString,
                                     style: TextStyle(
-                                      color: Theme.of(context).colorScheme.onPrimary,
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onPrimary,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 16,
                                     ),
@@ -155,12 +170,14 @@ class HomeScreen extends StatelessWidget {
                                   vertical: 6,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: AppColors.up,
+                                  color: displayProfitValue >= 0
+                                      ? AppColors.up
+                                      : AppColors.down,
                                   borderRadius: BorderRadius.circular(20),
                                 ),
-                                child: const Text(
-                                  "%8.61",
-                                  style: TextStyle(
+                                child: Text(
+                                  "%${profitRate.toStringAsFixed(2)}",
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                   ),
@@ -261,12 +278,12 @@ class HomeScreen extends StatelessWidget {
               allStocks: state.allStocks,
               title: "Favorilere Ekle",
               onStockSelected: (stock) {
-                 Navigator.pop(context);
-                 context.read<StockBloc>().add(AddFavoriteStock(stock.symbol));
+                Navigator.pop(context);
+                context.read<StockBloc>().add(AddFavoriteStock(stock.symbol));
               },
             );
           }
-           return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

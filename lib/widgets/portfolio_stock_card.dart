@@ -10,6 +10,7 @@ class PortfolioStockCard extends StatelessWidget {
   final String weekly; // AL, SAT, NÖTR
   final String monthly;
   final String threeMonthly;
+  final VoidCallback? onDelete;
 
   const PortfolioStockCard({
     super.key,
@@ -21,6 +22,7 @@ class PortfolioStockCard extends StatelessWidget {
     required this.weekly,
     required this.monthly,
     required this.threeMonthly,
+    this.onDelete,
   });
 
   Color _getColorForRec(String rec) {
@@ -161,6 +163,15 @@ class PortfolioStockCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (onDelete != null) ...[
+                const SizedBox(width: 8),
+                IconButton(
+                  icon: const Icon(Icons.delete_outline, color: Colors.grey),
+                  onPressed: onDelete,
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+              ],
             ],
           ),
           const SizedBox(height: 16),

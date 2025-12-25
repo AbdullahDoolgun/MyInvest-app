@@ -24,10 +24,28 @@ class AddPortfolioStock extends StockEvent {
   List<Object> get props => [symbol, quantity, cost];
 }
 
+class RemovePortfolioStock extends StockEvent {
+  final String symbol;
+
+  const RemovePortfolioStock(this.symbol);
+
+  @override
+  List<Object> get props => [symbol];
+}
+
 class AddFavoriteStock extends StockEvent {
   final String symbol;
 
   const AddFavoriteStock(this.symbol);
+
+  @override
+  List<Object> get props => [symbol];
+}
+
+class RemoveFavoriteStock extends StockEvent {
+  final String symbol;
+
+  const RemoveFavoriteStock(this.symbol);
 
   @override
   List<Object> get props => [symbol];

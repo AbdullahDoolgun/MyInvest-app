@@ -178,6 +178,10 @@ class StockRepository {
     await _supabaseRepo.addToPortfolio(symbol, quantity, cost);
   }
 
+  Future<void> removeFromPortfolio(String symbol) async {
+    await _supabaseRepo.removeFromPortfolio(symbol);
+  }
+
   Future<void> addFavorite(String symbol) async {
     await _supabaseRepo.addFavorite(symbol);
   }

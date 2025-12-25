@@ -13,7 +13,9 @@ class StockBloc extends Bloc<StockEvent, StockState> {
   StockBloc({required this.repository}) : super(StockLoading()) {
     on<LoadStocks>(_onLoadStocks);
     on<AddPortfolioStock>(_onAddPortfolioStock);
+    on<RemovePortfolioStock>(_onRemovePortfolioStock);
     on<AddFavoriteStock>(_onAddFavoriteStock);
+    on<RemoveFavoriteStock>(_onRemoveFavoriteStock);
     on<RefreshStocks>(_onRefreshStocks);
   }
 
@@ -74,6 +76,42 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         emit(currentState.copyWith(portfolioItems: List.from(portfolio)));
       } catch (e) {
         emit(StockError("Failed to add to portfolio: $e"));
+      }
+    }
+  }
+
+  Future<void> _onRemovePortfolioStock(
+    RemovePortfolioStock event,
+    Emitter<StockState> emit,
+  ) async {
+    if (state is StockLoaded) {
+      try {
+        await repository.removeFromPortfolio(event.symbol);
+
+        // Reload data
+        final portfolio = await repository.getPortfolio();
+        final currentState = state as StockLoaded;
+        emit(currentState.copyWith(portfolioItems: List.from(portfolio)));
+      } catch (e) {
+        emit(StockError("Failed to remove from portfolio: $e"));
+      }
+    }
+  }
+
+  Future<void> _onRemoveFavoriteStock(
+    RemoveFavoriteStock event,
+    Emitter<StockState> emit,
+  ) async {
+    if (state is StockLoaded) {
+      try {
+        await repository.removeFavorite(event.symbol);
+
+        // Reload data
+        final favorites = await repository.getFavorites();
+        final currentState = state as StockLoaded;
+        emit(currentState.copyWith(favoriteStocks: List.from(favorites)));
+      } catch (e) {
+        emit(StockError("Failed to remove favorite: $e"));
       }
     }
   }

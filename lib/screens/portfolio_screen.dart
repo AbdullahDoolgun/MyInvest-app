@@ -54,9 +54,9 @@ class PortfolioScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 8),
-                            // Mock Value
+                            // Real Value
                             Text(
-                              "₺128,450.75",
+                              "₺${state.totalCurrentValue.toStringAsFixed(2)}",
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface,
                                 fontSize: 28,
@@ -70,22 +70,30 @@ class PortfolioScreen extends StatelessWidget {
                                 vertical: 4,
                               ),
                               decoration: BoxDecoration(
-                                color: AppColors.upLight,
+                                color: state.totalProfitLoss >= 0
+                                    ? AppColors.upLight
+                                    : AppColors.downLight,
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
-                                children: const [
+                                children: [
                                   Icon(
-                                    Icons.arrow_upward,
+                                    state.totalProfitLoss >= 0
+                                        ? Icons.arrow_upward
+                                        : Icons.arrow_downward,
                                     size: 14,
-                                    color: AppColors.up,
+                                    color: state.totalProfitLoss >= 0
+                                        ? AppColors.up
+                                        : AppColors.down,
                                   ),
-                                  SizedBox(width: 4),
+                                  const SizedBox(width: 4),
                                   Text(
-                                    "+₺1,240.10 (+1.87%)",
+                                    "${state.totalProfitLoss >= 0 ? '+' : ''}₺${state.totalProfitLoss.toStringAsFixed(2)} (${state.totalProfitLossRate.toStringAsFixed(2)}%)",
                                     style: TextStyle(
-                                      color: AppColors.up,
+                                      color: state.totalProfitLoss >= 0
+                                          ? AppColors.up
+                                          : AppColors.down,
                                       fontWeight: FontWeight.bold,
                                       fontSize: 12,
                                     ),
@@ -154,6 +162,35 @@ class PortfolioScreen extends StatelessWidget {
                     weekly: item.weeklyRec,
                     monthly: item.monthlyRec,
                     threeMonthly: item.threeMonthlyRec,
+                    onDelete: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Hisseni Sil"),
+                          content: Text(
+                            "${item.stock.symbol} portföyünden silinsin mi?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("İptal"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.read<StockBloc>().add(
+                                  RemovePortfolioStock(item.stock.symbol),
+                                );
+                              },
+                              child: const Text(
+                                "Sil",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
 
@@ -194,6 +231,35 @@ class PortfolioScreen extends StatelessWidget {
                     weekly: "AL",
                     monthly: "NÖTR",
                     threeMonthly: "SAT", // Mock data
+                    onDelete: () {
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          title: const Text("Favorilerden Çıkar"),
+                          content: Text(
+                            "${stock.symbol} favorilerden çıkarılsın mı?",
+                          ),
+                          actions: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: const Text("İptal"),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                context.read<StockBloc>().add(
+                                  RemoveFavoriteStock(stock.symbol),
+                                );
+                              },
+                              child: const Text(
+                                "Çıkar",
+                                style: TextStyle(color: Colors.red),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
                   ),
                 ),
 
@@ -207,7 +273,6 @@ class PortfolioScreen extends StatelessWidget {
     );
   }
 
-
   void _showAddFavoriteSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
@@ -220,12 +285,12 @@ class PortfolioScreen extends StatelessWidget {
               allStocks: state.allStocks,
               title: "Favorilere Ekle",
               onStockSelected: (stock) {
-                 Navigator.pop(context);
-                 context.read<StockBloc>().add(AddFavoriteStock(stock.symbol));
+                Navigator.pop(context);
+                context.read<StockBloc>().add(AddFavoriteStock(stock.symbol));
               },
             );
           }
-           return const Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         },
       ),
     );

@@ -5,10 +5,10 @@ class SupabasePortfolioRepository {
   final SupabaseClient _supabase;
 
   SupabasePortfolioRepository({SupabaseClient? supabase})
-      : _supabase = supabase ?? Supabase.instance.client;
+    : _supabase = supabase ?? Supabase.instance.client;
 
   // --- Portfolio Methods ---
-  
+
   Future<List<Map<String, dynamic>>> getPortfolio() async {
     final user = _supabase.auth.currentUser;
     if (user == null) return [];
@@ -24,6 +24,17 @@ class SupabasePortfolioRepository {
       debugPrint("Supabase Portfolio Error: $e");
       return [];
     }
+  }
+
+  Future<void> removeFromPortfolio(String symbol) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    await _supabase
+        .from('portfolio')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('symbol', symbol);
   }
 
   Future<void> addToPortfolio(String symbol, int quantity, double cost) async {
@@ -42,15 +53,19 @@ class SupabasePortfolioRepository {
       // Update existing
       final int oldQty = existing['quantity'];
       final double oldCost = (existing['average_cost'] as num).toDouble();
-      
-      final int newQty = oldQty + quantity;
-      final double newAvgCost = ((oldQty * oldCost) + (quantity * cost)) / newQty;
 
-      await _supabase.from('portfolio').update({
-        'quantity': newQty,
-        'average_cost': newAvgCost,
-        'updated_at': DateTime.now().toIso8601String(),
-      }).eq('id', existing['id']);
+      final int newQty = oldQty + quantity;
+      final double newAvgCost =
+          ((oldQty * oldCost) + (quantity * cost)) / newQty;
+
+      await _supabase
+          .from('portfolio')
+          .update({
+            'quantity': newQty,
+            'average_cost': newAvgCost,
+            'updated_at': DateTime.now().toIso8601String(),
+          })
+          .eq('id', existing['id']);
     } else {
       // Insert new
       await _supabase.from('portfolio').insert({
@@ -74,7 +89,7 @@ class SupabasePortfolioRepository {
           .from('favorites')
           .select('symbol')
           .eq('user_id', user.id);
-          
+
       return (response as List).map((e) => e['symbol'] as String).toList();
     } catch (e) {
       debugPrint("Supabase Favorites Error: $e");
@@ -88,12 +103,12 @@ class SupabasePortfolioRepository {
 
     // Check duplicates
     final existing = await _supabase
-      .from('favorites')
-      .select()
-      .eq('user_id', user.id)
-      .eq('symbol', symbol)
-      .maybeSingle();
-      
+        .from('favorites')
+        .select()
+        .eq('user_id', user.id)
+        .eq('symbol', symbol)
+        .maybeSingle();
+
     if (existing != null) return;
 
     await _supabase.from('favorites').insert({
