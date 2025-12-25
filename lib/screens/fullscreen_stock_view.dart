@@ -163,8 +163,9 @@ class _FullScreenStockViewState extends State<FullScreenStockView> {
                             // The user's slider was controlling "how many items on screen".
 
                             int displayLimit = _itemCount;
-                            if (displayLimit > currentStocks.length)
+                            if (displayLimit > currentStocks.length) {
                               displayLimit = currentStocks.length;
+                            }
 
                             final visibleStocks = currentStocks
                                 .take(displayLimit)

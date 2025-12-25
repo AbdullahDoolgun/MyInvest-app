@@ -26,7 +26,15 @@ class _LoginScreenState extends State<LoginScreen> {
     final email = _emailController.text.trim();
     final password = _passwordController.text.trim();
 
-    if (email.isEmpty || password.isEmpty) return;
+    if (email.isEmpty || password.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Lütfen e-posta ve şifrenizi girin."),
+          backgroundColor: AppColors.down,
+        ),
+      );
+      return;
+    }
 
     context.read<AuthCubit>().signIn(email, password);
   }

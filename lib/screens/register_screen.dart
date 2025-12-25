@@ -193,8 +193,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return DropdownMenuItem(value: g, child: Text(g));
                           }).toList(),
                           onChanged: (val) {
-                            if (val != null)
+                            if (val != null) {
                               setState(() => _selectedGender = val);
+                            }
                           },
                         ),
                       ),
@@ -283,7 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       keyboardType: keyboardType,
       validator: (value) {
         if (value == null || value.isEmpty) {
-          return '$label gerekli';
+          return '$label alanını doldurunuz.';
         }
         return null;
       },

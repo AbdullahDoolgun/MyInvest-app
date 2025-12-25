@@ -36,7 +36,7 @@ class AuthCubit extends Cubit<AuthState> {
     try {
       await _authRepository.signIn(identifier: identifier, password: password);
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(_getErrorMessage(e)));
     }
   }
 
@@ -66,7 +66,7 @@ class AuthCubit extends Cubit<AuthState> {
       );
       emit(Unauthenticated()); // Clear loading state
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(_getErrorMessage(e)));
     }
   }
 
@@ -93,7 +93,7 @@ class AuthCubit extends Cubit<AuthState> {
         emit(Authenticated(currentUser));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(_getErrorMessage(e)));
     }
   }
 
@@ -106,11 +106,29 @@ class AuthCubit extends Cubit<AuthState> {
         emit(Authenticated(currentUser));
       }
     } catch (e) {
-      emit(AuthError(e.toString()));
+      emit(AuthError(_getErrorMessage(e)));
     }
   }
 
   Future<void> signOut() async {
     await _authRepository.signOut();
+  }
+
+  String _getErrorMessage(dynamic error) {
+    if (error is AuthException) {
+      if (error.message.contains('Invalid login credentials')) {
+        return 'E-posta veya şifre hatalı.';
+      } else if (error.message.contains('User already registered')) {
+        return 'Bu e-posta adresi zaten kayıtlı.';
+      } else if (error.message.contains('Password should be')) {
+        return 'Şifre çok zayıf. En az 6 karakter kullanın.';
+      } else if (error.message.contains('Email not confirmed')) {
+        return 'Lütfen e-posta adresinizi doğrulayın.';
+      } else if (error.message.contains('Kullanıcı adı bulunamadı')) {
+        return 'Kullanıcı adı bulunamadı.';
+      }
+    }
+    // Fallback for other errors (simplified)
+    return 'Bir hata oluştu. Lütfen tekrar deneyin.';
   }
 }
