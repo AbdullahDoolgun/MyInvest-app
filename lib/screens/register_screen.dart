@@ -12,12 +12,13 @@ class RegisterScreen extends StatefulWidget {
 
 class _RegisterScreenState extends State<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
-  
+
   // Controllers
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
+  final _usernameController = TextEditingController();
   final _ageController = TextEditingController();
   final _cityController = TextEditingController();
   final _countryController = TextEditingController(text: 'Türkiye'); // Default
@@ -31,24 +32,41 @@ class _RegisterScreenState extends State<RegisterScreen> {
     _passwordController.dispose();
     _firstNameController.dispose();
     _lastNameController.dispose();
+    _usernameController.dispose();
     _ageController.dispose();
     _cityController.dispose();
     _countryController.dispose();
     super.dispose();
   }
 
-  void _submit() {
+  Future<void> _submit() async {
     if (_formKey.currentState!.validate()) {
-      context.read<AuthCubit>().signUp(
+      await context.read<AuthCubit>().signUp(
         email: _emailController.text.trim(),
         password: _passwordController.text.trim(),
         firstName: _firstNameController.text.trim(),
         lastName: _lastNameController.text.trim(),
+        username: _usernameController.text.trim(),
         gender: _selectedGender,
         age: int.tryParse(_ageController.text) ?? 0,
         city: _cityController.text.trim(),
         country: _countryController.text.trim(),
       );
+
+      if (!mounted) return;
+
+      // Ensure we are not in error state
+      final state = context.read<AuthCubit>().state;
+      if (state is! AuthError) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Kayıt başarılı! Lütfen giriş yapın."),
+            ),
+          );
+          Navigator.pop(context);
+        }
+      }
     }
   }
 
@@ -60,7 +78,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Theme.of(context).colorScheme.onSurface),
+          icon: Icon(
+            Icons.arrow_back_ios,
+            color: Theme.of(context).colorScheme.onSurface,
+          ),
           onPressed: () => Navigator.pop(context),
         ),
       ),
@@ -69,12 +90,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
           if (state is Authenticated) {
             Navigator.pop(context); // Go back to login or through AuthGate
           } else if (state is AuthError) {
-             ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(
-                 content: Text(state.message),
-                 backgroundColor: AppColors.down,
-               ),
-             );
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.down,
+              ),
+            );
           }
         },
         child: Center(
@@ -99,12 +120,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     'Hemen aramıza katılın',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
                   const SizedBox(height: 32),
-                  
+
                   // Name & Surname Row
                   Row(
                     children: [
@@ -124,6 +147,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                       ),
                     ],
+                  ),
+                  const SizedBox(height: 16),
+
+                  _buildTextField(
+                    controller: _usernameController, // Needs to be defined
+                    label: 'Kullanıcı Adı',
+                    icon: Icons.alternate_email,
                   ),
                   const SizedBox(height: 16),
 
@@ -163,7 +193,8 @@ class _RegisterScreenState extends State<RegisterScreen> {
                             return DropdownMenuItem(value: g, child: Text(g));
                           }).toList(),
                           onChanged: (val) {
-                            if (val != null) setState(() => _selectedGender = val);
+                            if (val != null)
+                              setState(() => _selectedGender = val);
                           },
                         ),
                       ),
@@ -180,7 +211,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  
+
                   // Location
                   Row(
                     children: [
@@ -222,7 +253,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         ),
                         child: const Text(
                           'Kayıt Ol',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       );
                     },

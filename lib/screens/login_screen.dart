@@ -14,7 +14,7 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   @override
   void dispose() {
     _emailController.dispose();
@@ -37,14 +37,14 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppColors.background,
       body: BlocConsumer<AuthCubit, AuthState>(
         listener: (context, state) {
-           if (state is AuthError) {
-             ScaffoldMessenger.of(context).showSnackBar(
-               SnackBar(
-                 content: Text(state.message),
-                 backgroundColor: AppColors.down,
-               ),
-             );
-           }
+          if (state is AuthError) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(state.message),
+                backgroundColor: AppColors.down,
+              ),
+            );
+          }
         },
         builder: (context, state) {
           return Center(
@@ -54,14 +54,10 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                   // Logo or Icon could go here
-                  Icon(
-                    Icons.show_chart,
-                    size: 80,
-                    color: AppColors.accent,
-                  ),
+                  // Logo or Icon could go here
+                  Icon(Icons.show_chart, size: 80, color: AppColors.accent),
                   const SizedBox(height: 24),
-                  
+
                   Text(
                     'Hoş Geldiniz',
                     style: TextStyle(
@@ -76,7 +72,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     'Portföyünüzü yönetmek için giriş yapın',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.onSurface.withValues(alpha: 0.6),
                     ),
                     textAlign: TextAlign.center,
                   ),
@@ -84,10 +82,11 @@ class _LoginScreenState extends State<LoginScreen> {
 
                   TextField(
                     controller: _emailController,
-                    keyboardType: TextInputType.emailAddress,
+                    keyboardType: TextInputType
+                        .emailAddress, // Or text if usernames are common
                     decoration: InputDecoration(
-                      labelText: 'E-posta',
-                      prefixIcon: const Icon(Icons.email_outlined),
+                      labelText: 'Kullanıcı Adı veya E-posta',
+                      prefixIcon: const Icon(Icons.person_outline),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -96,7 +95,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                   ),
                   const SizedBox(height: 16),
-                  
+
                   TextField(
                     controller: _passwordController,
                     decoration: InputDecoration(
@@ -111,7 +110,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     obscureText: true,
                   ),
                   const SizedBox(height: 24),
-                  
+
                   if (state is AuthLoading)
                     const Center(child: CircularProgressIndicator())
                   else
@@ -128,19 +127,23 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                       child: const Text(
                         'Giriş Yap',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
                     ),
 
                   const SizedBox(height: 24),
-                  
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       Text(
                         'Hesabınız yok mu? ',
                         style: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface),
+                          color: Theme.of(context).colorScheme.onSurface,
+                        ),
                       ),
                       TextButton(
                         onPressed: () {
@@ -153,7 +156,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         },
                         child: const Text(
                           'Kayıt Ol',
-                          style: TextStyle(color: AppColors.accent, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.bold,
+                          ),
                         ),
                       ),
                     ],

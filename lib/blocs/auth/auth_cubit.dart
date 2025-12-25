@@ -31,10 +31,10 @@ class AuthCubit extends Cubit<AuthState> {
     });
   }
 
-  Future<void> signIn(String email, String password) async {
+  Future<void> signIn(String identifier, String password) async {
     emit(AuthLoading());
     try {
-      await _authRepository.signIn(email: email, password: password);
+      await _authRepository.signIn(identifier: identifier, password: password);
     } catch (e) {
       emit(AuthError(e.toString()));
     }
@@ -45,6 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
     required String password,
     required String firstName,
     required String lastName,
+    required String username, // New
     required String gender,
     required int age,
     required String city,
@@ -57,11 +58,13 @@ class AuthCubit extends Cubit<AuthState> {
         password: password,
         firstName: firstName,
         lastName: lastName,
+        username: username,
         gender: gender,
         age: age,
         city: city,
         country: country,
       );
+      emit(Unauthenticated()); // Clear loading state
     } catch (e) {
       emit(AuthError(e.toString()));
     }
