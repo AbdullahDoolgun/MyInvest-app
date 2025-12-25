@@ -1,4 +1,5 @@
 import '../models/stock_model.dart';
+import '../models/transaction_model.dart';
 import 'yahoo_finance_service.dart';
 import 'supabase_portfolio_repository.dart';
 import 'dart:async';
@@ -164,6 +165,10 @@ class StockRepository {
 
     // 2. Get Live Data
     return await _fetchOrMock(favoriteSymbols);
+  }
+
+  Future<List<PortfolioTransaction>> getTransactions() async {
+    return await _supabaseRepo.getTransactions();
   }
 
   Future<List<Stock>> getBist30Stocks() async {

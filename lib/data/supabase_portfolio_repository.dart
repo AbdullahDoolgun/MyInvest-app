@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import '../models/transaction_model.dart';
 
 class SupabasePortfolioRepository {
   final SupabaseClient _supabase;
@@ -30,11 +31,29 @@ class SupabasePortfolioRepository {
     final user = _supabase.auth.currentUser;
     if (user == null) return;
 
-    await _supabase
+    // Fetch existing validation to record transaction
+    final existing = await _supabase
         .from('portfolio')
-        .delete()
+        .select()
         .eq('user_id', user.id)
-        .eq('symbol', symbol);
+        .eq('symbol', symbol)
+        .maybeSingle();
+
+    if (existing != null) {
+      final int quantity = existing['quantity'];
+      // Ideally we should use current market price, but we don't have it here easily without refetching.
+      // We will use average_cost as a proxy for now or pass it in. passed in is better but signature change...
+      // For now, let's use average_cost to record what was effectively "removed".
+      final double price = (existing['average_cost'] as num).toDouble();
+
+      await _supabase
+          .from('portfolio')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('symbol', symbol);
+
+      await addTransaction(symbol, 'SELL', quantity, price);
+    }
   }
 
   Future<void> addToPortfolio(String symbol, int quantity, double cost) async {
@@ -65,7 +84,10 @@ class SupabasePortfolioRepository {
             'average_cost': newAvgCost,
             'updated_at': DateTime.now().toIso8601String(),
           })
+          .eq('user_id', user.id) // Ensure user_id is checked
           .eq('id', existing['id']);
+
+      await addTransaction(symbol, 'BUY', quantity, cost);
     } else {
       // Insert new
       await _supabase.from('portfolio').insert({
@@ -73,8 +95,11 @@ class SupabasePortfolioRepository {
         'symbol': symbol,
         'quantity': quantity,
         'average_cost': cost,
-        // 'weekly_rec': 'NÖTR', // Optional fields if your DB expects them
+        'created_at': DateTime.now().toIso8601String(),
+        'updated_at': DateTime.now().toIso8601String(),
       });
+
+      await addTransaction(symbol, 'BUY', quantity, cost);
     }
   }
 
@@ -126,5 +151,50 @@ class SupabasePortfolioRepository {
         .delete()
         .eq('user_id', user.id)
         .eq('symbol', symbol);
+  }
+
+  // --- Transaction Methods ---
+
+  Future<List<PortfolioTransaction>> getTransactions() async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return [];
+
+    try {
+      final response = await _supabase
+          .from('transactions')
+          .select()
+          .eq('user_id', user.id)
+          .order('created_at', ascending: false);
+
+      return (response as List)
+          .map((e) => PortfolioTransaction.fromJson(e))
+          .toList();
+    } catch (e) {
+      debugPrint("Supabase Transactions Error: $e");
+      return [];
+    }
+  }
+
+  Future<void> addTransaction(
+    String symbol,
+    String type,
+    int quantity,
+    double price,
+  ) async {
+    final user = _supabase.auth.currentUser;
+    if (user == null) return;
+
+    try {
+      await _supabase.from('transactions').insert({
+        'user_id': user.id,
+        'symbol': symbol,
+        'type': type,
+        'quantity': quantity,
+        'price': price,
+        'created_at': DateTime.now().toIso8601String(),
+      });
+    } catch (e) {
+      debugPrint("Supabase Add Transaction Error: $e");
+    }
   }
 }

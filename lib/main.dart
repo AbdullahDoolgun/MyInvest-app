@@ -92,18 +92,20 @@ class MainApp extends StatelessWidget {
               title: 'Borsa App',
               themeMode: state.themeMode,
               theme: ThemeData(
-                fontFamily: 'Roboto',
+                // fontFamily: 'Roboto', // Removed as it might not be bundled
                 colorScheme: AppColors.lightScheme,
                 scaffoldBackgroundColor: AppColors.background,
                 useMaterial3: true,
                 cardColor: AppColors.surface,
+                iconTheme: const IconThemeData(color: AppColors.primary),
               ),
               darkTheme: ThemeData(
-                fontFamily: 'Roboto',
+                // fontFamily: 'Roboto',
                 colorScheme: AppColors.darkScheme,
                 scaffoldBackgroundColor: AppColors.primary,
                 useMaterial3: true,
                 cardColor: AppColors.primary,
+                iconTheme: const IconThemeData(color: Colors.white),
               ),
               builder: (context, child) {
                 return MediaQuery(

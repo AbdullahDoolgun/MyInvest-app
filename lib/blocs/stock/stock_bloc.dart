@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import '../../models/stock_model.dart';
+import '../../models/transaction_model.dart';
 import '../../data/stock_repository.dart';
 import 'package:flutter/foundation.dart';
 
@@ -26,6 +27,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
       final favorites = await repository.getFavorites();
       final bist30 = await repository.getBist30Stocks();
       final participation = await repository.getParticipationStocks();
+      final transactions = await repository.getTransactions();
 
       emit(
         StockLoaded(
@@ -34,6 +36,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           favoriteStocks: favorites,
           bist30Stocks: bist30,
           participationStocks: participation,
+          transactions: transactions,
         ),
       );
     } catch (e) {
@@ -71,9 +74,16 @@ class StockBloc extends Bloc<StockEvent, StockState> {
           event.cost,
         );
         // Reload data
+        // Reload data
         final portfolio = await repository.getPortfolio();
+        final transactions = await repository.getTransactions();
         final currentState = state as StockLoaded;
-        emit(currentState.copyWith(portfolioItems: List.from(portfolio)));
+        emit(
+          currentState.copyWith(
+            portfolioItems: List.from(portfolio),
+            transactions: transactions,
+          ),
+        );
       } catch (e) {
         emit(StockError("Failed to add to portfolio: $e"));
       }
@@ -89,9 +99,16 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         await repository.removeFromPortfolio(event.symbol);
 
         // Reload data
+        // Reload data
         final portfolio = await repository.getPortfolio();
+        final transactions = await repository.getTransactions();
         final currentState = state as StockLoaded;
-        emit(currentState.copyWith(portfolioItems: List.from(portfolio)));
+        emit(
+          currentState.copyWith(
+            portfolioItems: List.from(portfolio),
+            transactions: transactions,
+          ),
+        );
       } catch (e) {
         emit(StockError("Failed to remove from portfolio: $e"));
       }
@@ -128,6 +145,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
         final favorites = await repository.getFavorites();
         final bist30 = await repository.getBist30Stocks();
         final participation = await repository.getParticipationStocks();
+        final transactions = await repository.getTransactions();
 
         emit(
           StockLoaded(
@@ -136,6 +154,7 @@ class StockBloc extends Bloc<StockEvent, StockState> {
             favoriteStocks: favorites,
             bist30Stocks: bist30,
             participationStocks: participation,
+            transactions: transactions,
             lastUpdated: DateTime.now(),
           ),
         );

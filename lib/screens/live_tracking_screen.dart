@@ -6,7 +6,6 @@ import '../blocs/stock/stock_bloc.dart';
 
 import '../models/stock_model.dart';
 
-
 class LiveTrackingScreen extends StatelessWidget {
   const LiveTrackingScreen({super.key});
 
@@ -40,13 +39,6 @@ class LiveTrackingScreen extends StatelessWidget {
                   indexValue: "10.420,15", // Mock Index Value
                   indexChange: "+%0.85",
                   stocks: state.participationStocks,
-                ),
-                _StockListSection(
-                  title: "Takip Listem",
-                  indexValue: "", 
-                  indexChange: "",
-                  stocks: state.favoriteStocks,
-                  isWatchlist: true,
                 ),
               ],
             ),
@@ -96,10 +88,19 @@ class _StockListSectionState extends State<_StockListSection> {
   Widget build(BuildContext context) {
     // If watchlist is empty and it's the watchlist section, handle gracefully
     if (widget.isWatchlist && widget.stocks.isEmpty) {
-        return Container(
-            padding: const EdgeInsets.all(16),
-            child: Center(child: Text("Takip listeniz boş", style: TextStyle(color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.5)))),
-        );
+      return Container(
+        padding: const EdgeInsets.all(16),
+        child: Center(
+          child: Text(
+            "Takip listeniz boş",
+            style: TextStyle(
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.5),
+            ),
+          ),
+        ),
+      );
     }
 
     return Padding(
@@ -109,115 +110,128 @@ class _StockListSectionState extends State<_StockListSection> {
         children: [
           // Section Header
           if (!widget.isWatchlist)
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Theme.of(context).cardColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(
-                color: Theme.of(
-                  context,
-                ).colorScheme.outline.withValues(alpha: 0.1),
+            Container(
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.1),
+                ),
               ),
-            ),
-            child: Row(
-              children: [
-                // Change Box (Left)
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: AppColors.upLight,
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Text(
-                    widget.indexChange,
-                    style: const TextStyle(
-                      color: AppColors.up,
-                      fontWeight: FontWeight.bold,
-                      fontSize: 16,
+              child: Row(
+                children: [
+                  // Change Box (Left)
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: AppColors.upLight,
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Text(
+                      widget.indexChange,
+                      style: const TextStyle(
+                        color: AppColors.up,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 16),
-                // Title & Value (Middle-Left)
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                  const SizedBox(width: 16),
+                  // Title & Value (Middle-Left)
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          widget.title,
+                          style: TextStyle(
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withValues(alpha: 0.7),
+                            fontSize: 12,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.indexValue,
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context).colorScheme.onSurface,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  // Sorting Buttons (Right)
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.end,
                     children: [
-                      Text(
-                        widget.title,
-                        style: TextStyle(
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withValues(alpha: 0.7),
-                          fontSize: 12,
-                        ),
+                      _buildSortButton(
+                        "En Çok Yükselen",
+                        SortType.risers,
+                        AppColors.up,
                       ),
-                      const SizedBox(height: 4),
-                      Text(
-                        widget.indexValue,
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.onSurface,
-                        ),
+                      const SizedBox(height: 8),
+                      _buildSortButton(
+                        "En Çok Düşen",
+                        SortType.fallers,
+                        AppColors.down,
                       ),
                     ],
                   ),
-                ),
-                // Sorting Buttons (Right)
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.end,
-                  children: [
-                     _buildSortButton("En Çok Yükselen", SortType.risers, AppColors.up),
-                     const SizedBox(height: 8),
-                     _buildSortButton("En Çok Düşen", SortType.fallers, AppColors.down),
-                  ],
-                )
-              ],
-            ),
-          ) else
+                ],
+              ),
+            )
+          else
             // Watchlist Header
             Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                    widget.title,
-                    style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.onSurface,
-                    ),
+              padding: const EdgeInsets.only(bottom: 8),
+              child: Text(
+                widget.title,
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.onSurface,
                 ),
+              ),
             ),
-          
+
           const SizedBox(height: 16),
 
           // List Header (Optional, but good for clarity)
-          if(!widget.isWatchlist)
-          Row(
-             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-             children: [
+          if (!widget.isWatchlist)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
                 Text(
                   "HİSSELER",
-                   style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7),
-                      fontWeight: FontWeight.bold,
-                   ),
+                  style: TextStyle(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.onSurface.withValues(alpha: 0.7),
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
-                 // Reset Sort Button (Optional)
+                // Reset Sort Button (Optional)
                 if (_sortType != SortType.none)
-                   GestureDetector(
-                       onTap: () => setState(() => _sortType = SortType.none),
-                       child: Text("Sıfırla", style: TextStyle(color: AppColors.primary, fontSize: 12)),
-                   ),
-             ],
-          ),
-          
-          if(!widget.isWatchlist)
-          const SizedBox(height: 12),
+                  GestureDetector(
+                    onTap: () => setState(() => _sortType = SortType.none),
+                    child: Text(
+                      "Sıfırla",
+                      style: TextStyle(color: AppColors.primary, fontSize: 12),
+                    ),
+                  ),
+              ],
+            ),
+
+          if (!widget.isWatchlist) const SizedBox(height: 12),
 
           // Grid of Stocks
           GridView.builder(
@@ -249,30 +263,30 @@ class _StockListSectionState extends State<_StockListSection> {
   }
 
   Widget _buildSortButton(String text, SortType type, Color color) {
-      final isSelected = _sortType == type;
-      return GestureDetector(
-          onTap: () {
-              setState(() {
-                  _sortType = (isSelected) ? SortType.none : type;
-              });
-          },
-          child: Container(
-             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-             decoration: BoxDecoration(
-                 color: isSelected ? color : Colors.transparent,
-                 borderRadius: BorderRadius.circular(4),
-                 border: Border.all(color: color),
-             ),
-             child: Text(
-                 text,
-                 style: TextStyle(
-                     fontSize: 10,
-                     fontWeight: FontWeight.bold,
-                     color: isSelected ? Colors.white : color,
-                 ),
-             ),
+    final isSelected = _sortType == type;
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          _sortType = (isSelected) ? SortType.none : type;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+        decoration: BoxDecoration(
+          color: isSelected ? color : Colors.transparent,
+          borderRadius: BorderRadius.circular(4),
+          border: Border.all(color: color),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : color,
           ),
-      );
+        ),
+      ),
+    );
   }
 }
 
@@ -321,7 +335,7 @@ class _GridStockCard extends StatelessWidget {
                 height: 32,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: colorScheme.surface, 
+                  color: colorScheme.surface,
                   shape: BoxShape.circle,
                   border: Border.all(
                     color: colorScheme.outline.withValues(alpha: 0.1),

@@ -48,18 +48,50 @@ class HomeScreen extends StatelessWidget {
                     ),
                     collapsedIconColor: Theme.of(context).colorScheme.onSurface,
                     iconColor: Theme.of(context).colorScheme.primary,
-                    children: const [
-                      ListTile(
-                        title: Text("BIMAS - Alış"),
-                        subtitle: Text("12.12.2023 - 10 Adet"),
-                        trailing: Text("₺4,952.50"),
-                      ),
-                      ListTile(
-                        title: Text("THYAO - Satış"),
-                        subtitle: Text("10.12.2023 - 5 Adet"),
-                        trailing: Text("₺1,493.75"),
-                      ),
-                    ],
+                    children: state.transactions.isEmpty
+                        ? [
+                            const Padding(
+                              padding: EdgeInsets.all(16.0),
+                              child: Text("Henüz işlem geçmişi yok."),
+                            ),
+                          ]
+                        : state.transactions.map((transaction) {
+                            final isBuy = transaction.type == 'BUY';
+                            final dateStr =
+                                "${transaction.date.day}.${transaction.date.month}.${transaction.date.year}";
+                            return ListTile(
+                              leading: Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: BoxDecoration(
+                                  color: (isBuy ? AppColors.up : AppColors.down)
+                                      .withValues(alpha: 0.1),
+                                  shape: BoxShape.circle,
+                                ),
+                                child: Icon(
+                                  isBuy
+                                      ? Icons.arrow_circle_up
+                                      : Icons.arrow_circle_down,
+                                  color: isBuy ? AppColors.up : AppColors.down,
+                                ),
+                              ),
+                              title: Text(
+                                "${transaction.symbol} - ${isBuy ? 'Alış' : 'Satış'}",
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: isBuy ? AppColors.up : AppColors.down,
+                                ),
+                              ),
+                              subtitle: Text(
+                                "$dateStr - ${transaction.quantity} Adet",
+                              ),
+                              trailing: Text(
+                                "₺${(transaction.price * transaction.quantity).toStringAsFixed(2)}",
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            );
+                          }).toList(),
                   ),
                 ),
                 const SizedBox(height: 16),

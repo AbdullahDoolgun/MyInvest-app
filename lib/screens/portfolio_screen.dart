@@ -27,7 +27,7 @@ class PortfolioScreen extends StatelessWidget {
                   width: double.infinity,
                   padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).cardColor,
+                    color: Theme.of(context).colorScheme.primary,
                     borderRadius: BorderRadius.circular(20),
                     boxShadow: [
                       BoxShadow(
@@ -48,7 +48,7 @@ class PortfolioScreen extends StatelessWidget {
                               style: TextStyle(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onSurface.withValues(alpha: 0.7),
+                                ).colorScheme.onPrimary.withValues(alpha: 0.7),
                                 fontSize: 12,
                                 fontWeight: FontWeight.bold,
                               ),
@@ -58,7 +58,7 @@ class PortfolioScreen extends StatelessWidget {
                             Text(
                               "₺${state.totalCurrentValue.toStringAsFixed(2)}",
                               style: TextStyle(
-                                color: Theme.of(context).colorScheme.onSurface,
+                                color: Theme.of(context).colorScheme.onPrimary,
                                 fontSize: 28,
                                 fontWeight: FontWeight.bold,
                               ),

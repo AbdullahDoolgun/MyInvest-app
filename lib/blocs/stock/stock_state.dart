@@ -15,6 +15,7 @@ class StockLoaded extends StockState {
   final List<Stock> favoriteStocks;
   final List<Stock> bist30Stocks;
   final List<Stock> participationStocks;
+  final List<PortfolioTransaction> transactions;
   final DateTime? lastUpdated;
 
   const StockLoaded({
@@ -23,6 +24,7 @@ class StockLoaded extends StockState {
     this.favoriteStocks = const [],
     this.bist30Stocks = const [],
     this.participationStocks = const [],
+    this.transactions = const [],
     this.lastUpdated,
   });
 
@@ -54,6 +56,7 @@ class StockLoaded extends StockState {
     favoriteStocks,
     bist30Stocks,
     participationStocks,
+    transactions,
     lastUpdated,
   ];
 
@@ -63,6 +66,7 @@ class StockLoaded extends StockState {
     List<Stock>? favoriteStocks,
     List<Stock>? bist30Stocks,
     List<Stock>? participationStocks,
+    List<PortfolioTransaction>? transactions,
     DateTime? lastUpdated,
   }) {
     return StockLoaded(
@@ -71,6 +75,7 @@ class StockLoaded extends StockState {
       favoriteStocks: favoriteStocks ?? this.favoriteStocks,
       bist30Stocks: bist30Stocks ?? this.bist30Stocks,
       participationStocks: participationStocks ?? this.participationStocks,
+      transactions: transactions ?? this.transactions,
       lastUpdated: lastUpdated ?? DateTime.now(),
     );
   }
