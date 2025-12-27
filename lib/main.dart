@@ -8,10 +8,12 @@ import 'constants/app_secrets.dart';
 import 'data/stock_repository.dart';
 import 'data/supabase_auth_repository.dart';
 import 'data/supabase_portfolio_repository.dart';
+import 'data/invest_boss_repository.dart';
 import 'blocs/stock/stock_bloc.dart';
 import 'blocs/theme/theme_cubit.dart';
 import 'blocs/settings/settings_cubit.dart';
 import 'blocs/auth/auth_cubit.dart';
+import 'blocs/invest_boss/invest_boss_bloc.dart';
 import 'widgets/auth_gate.dart';
 
 void main() async {
@@ -39,12 +41,14 @@ void main() async {
       final stockRepository = StockRepository();
       final authRepository = SupabaseAuthRepository();
       final portfolioRepository = SupabasePortfolioRepository();
+      final investBossRepository = InvestBossRepository();
 
       runApp(
         MainApp(
           stockRepository: stockRepository,
           authRepository: authRepository,
           portfolioRepository: portfolioRepository,
+          investBossRepository: investBossRepository,
         ),
       );
     },
@@ -59,12 +63,14 @@ class MainApp extends StatelessWidget {
   final StockRepository stockRepository;
   final SupabaseAuthRepository authRepository;
   final SupabasePortfolioRepository portfolioRepository;
+  final InvestBossRepository investBossRepository;
 
   const MainApp({
     super.key,
     required this.stockRepository,
     required this.authRepository,
     required this.portfolioRepository,
+    required this.investBossRepository,
   });
 
   @override
@@ -74,6 +80,7 @@ class MainApp extends StatelessWidget {
         RepositoryProvider.value(value: stockRepository),
         RepositoryProvider.value(value: authRepository),
         RepositoryProvider.value(value: portfolioRepository),
+        RepositoryProvider.value(value: investBossRepository),
       ],
       child: MultiBlocProvider(
         providers: [
@@ -81,6 +88,11 @@ class MainApp extends StatelessWidget {
           BlocProvider(
             create: (context) =>
                 StockBloc(repository: stockRepository)..add(LoadStocks()),
+          ),
+          BlocProvider(
+            create: (context) =>
+                InvestBossBloc(repository: investBossRepository)
+                  ..add(LoadGameData()),
           ),
           BlocProvider(create: (context) => ThemeCubit()),
           BlocProvider(create: (context) => SettingsCubit()),

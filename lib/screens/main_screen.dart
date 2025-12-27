@@ -8,6 +8,7 @@ import 'home_screen.dart';
 import 'live_tracking_screen.dart';
 import 'portfolio_screen.dart';
 import 'settings_screen.dart';
+import 'invest_boss_screen.dart';
 
 import 'dart:async'; // Add this
 
@@ -27,6 +28,7 @@ class _MainScreenState extends State<MainScreen> {
     HomeScreen(),
     LiveTrackingScreen(),
     PortfolioScreen(),
+    InvestBossScreen(),
   ];
 
   @override
@@ -162,6 +164,10 @@ class _MainScreenState extends State<MainScreen> {
           BottomNavigationBarItem(
             icon: Icon(Icons.account_balance_wallet),
             label: 'Portföy',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.monetization_on),
+            label: 'InvestBoss',
           ),
         ],
       ),
