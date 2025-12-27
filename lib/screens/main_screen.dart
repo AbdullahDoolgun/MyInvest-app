@@ -47,8 +47,18 @@ class _MainScreenState extends State<MainScreen> {
 
     _refreshTimer = Timer.periodic(Duration(seconds: duration), (timer) {
       if (mounted) {
-        debugPrint("Timer Tick: Requesting Refresh (Interval: $duration s)");
-        context.read<StockBloc>().add(RefreshStocks());
+        final now = DateTime.now();
+        // Info: User requested specific hours 10:00 - 17:00.
+        // hour >= 10 && hour < 17 covers 10:00:00 to 16:59:59.
+        final isMarketOpen = now.hour >= 10 && now.hour < 17;
+
+        if (isMarketOpen) {
+          debugPrint("Timer Tick: Requesting Refresh (Interval: $duration s)");
+          context.read<StockBloc>().add(RefreshStocks());
+        } else {
+          // Debug log to confirm it's working but skipping
+          debugPrint("Market Closed (Hour: ${now.hour}). Skipping refresh.");
+        }
       }
     });
   }
