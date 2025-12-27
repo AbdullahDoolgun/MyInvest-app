@@ -56,7 +56,7 @@ class InvestBossRepository {
 
   Future<void> buyStock(String symbol, int quantity, double price) async {
     final user = _supabase.auth.currentUser;
-    if (user == null) throw Exception("User not logged in");
+    if (user == null) throw Exception("Oturum açılmadı");
 
     final cost = quantity * price;
 
@@ -110,7 +110,7 @@ class InvestBossRepository {
 
   Future<void> sellStock(String symbol, int quantity, double price) async {
     final user = _supabase.auth.currentUser;
-    if (user == null) throw Exception("User not logged in");
+    if (user == null) throw Exception("Oturum açılmadı");
 
     final revenue = quantity * price;
 

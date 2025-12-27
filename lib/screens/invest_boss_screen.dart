@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../blocs/invest_boss/invest_boss_bloc.dart';
 import '../blocs/stock/stock_bloc.dart';
+import '../blocs/auth/auth_cubit.dart';
 import '../constants/colors.dart';
 
 class InvestBossScreen extends StatefulWidget {
@@ -29,28 +30,149 @@ class _InvestBossScreenState extends State<InvestBossScreen>
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("InvestBoss"),
-        bottom: TabBar(
+    return BlocListener<InvestBossBloc, InvestBossState>(
+      listener: (context, state) {
+        if (state.status == InvestBossStatus.failure && state.errorMessage != null) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.errorMessage!),
+              backgroundColor: Colors.red,
+            ),
+          );
+        } else if (state.status == InvestBossStatus.success) {
+           ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("İşlem Başarılı"),
+              backgroundColor: Colors.green,
+            ),
+          );
+        }
+      },
+      child: Scaffold(
+        appBar: AppBar(
+          toolbarHeight: 0, // Hides the toolbar part effectively
+          bottom: TabBar(
+            controller: _tabController,
+            indicatorColor: AppColors.primary,
+            labelColor: Colors.black,
+            unselectedLabelColor: Colors.grey,
+            tabs: const [
+              Tab(text: "1M TL"),
+              Tab(text: "Boss"),
+            ],
+          ),
+        ),
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: AppColors.accent,
-          labelColor: Colors.white,
-          unselectedLabelColor: Colors.white70,
-          tabs: const [
-            Tab(text: "1M Dolar"),
-            Tab(text: "Boss"),
+          children: const [
+            OneMillionDollarTab(),
+            BossLeaderboardTab(),
           ],
         ),
       ),
-      body: TabBarView(
-        controller: _tabController,
-        children: const [
-          OneMillionDollarTab(),
-          BossLeaderboardTab(),
-        ],
-      ),
     );
+  }
+}
+
+// ... OneMillionDollarTab remains similar ...
+
+// --- TAB 2: BOSS LEADERBOARD ---
+
+class BossLeaderboardTab extends StatelessWidget {
+  const BossLeaderboardTab({super.key});
+  
+  String maskName(String? firstName, String? lastName) {
+      if (firstName == null || firstName.isEmpty) return "B*** K********";
+      
+      String f = firstName.substring(0, 1) + "*" * (firstName.length - 1);
+      String l = "";
+      if (lastName != null && lastName.isNotEmpty) {
+           l = lastName.substring(0, 1) + "*" * (lastName.length - 1);
+      } else {
+           l = "*****";
+      }
+      return "$f $l";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final textColor = isDark ? Colors.white : Colors.black87;
+
+    return BlocBuilder<InvestBossBloc, InvestBossState>(
+      builder: (context, state) {
+        if (state.status == InvestBossStatus.loading && state.leaderboard.isEmpty) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        
+        final leaderboard = state.leaderboard;
+
+        return Column(
+          children: [
+            Container(
+              padding: const EdgeInsets.all(16),
+              color: isDark ? AppColors.primaryLight : AppColors.surface,
+              child: Row(
+                children: [
+                  const Icon(Icons.emoji_events, color: Colors.amber),
+                  const SizedBox(width: 8),
+                  Text(
+                    "Liderlik Tablosu",
+                    style: TextStyle(
+                        fontSize: 18, 
+                        fontWeight: FontWeight.bold,
+                        color: textColor
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Expanded(
+              child: ListView.separated(
+                itemCount: leaderboard.length,
+                separatorBuilder: (c, i) => const Divider(height: 1),
+                itemBuilder: (context, index) {
+                  final item = leaderboard[index];
+                  final equity = (item['total_equity'] as num).toDouble();
+                  final initial = (item['initial_capital'] as num).toDouble();
+                  final profit = equity - initial;
+
+                  return ListTile(
+                    leading: CircleAvatar(
+                      backgroundColor: _getRankColor(index),
+                      foregroundColor: Colors.white,
+                      child: Text("${index + 1}"),
+                    ),
+                    title: Text(
+                         maskName(item['first_name'], item['last_name']),
+                         style: TextStyle(
+                             fontWeight: FontWeight.bold,
+                             color: textColor
+                         ),
+                    ),
+                    trailing: Text(
+                      "${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)} ₺",
+                      style: TextStyle(
+                        color: profit >= 0 ? AppColors.up : AppColors.down,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+  
+  Color _getRankColor(int index) {
+      if (index == 0) return Colors.amber;
+      if (index == 1) return const Color(0xFFC0C0C0); // Silver
+      if (index == 2) return const Color(0xFFCD7F32); // Bronze
+      return AppColors.accent;
   }
 }
 
@@ -91,10 +213,6 @@ class OneMillionDollarTab extends StatelessWidget {
                      stockValue += qty * currentPrice;
                  }
                  equity += stockValue;
-                 
-                 // Sync equity to DB periodically?
-                 // Let's do it once here if it differs significantly? 
-                 // No, don't trigger side effects in build.
              }
 
             return Column(
@@ -257,11 +375,18 @@ class _TradeSheetState extends State<TradeSheet> {
     
     @override
     Widget build(BuildContext context) {
-        return Padding(
+        // Listen for Auth changes to close sheet on logout
+        return BlocListener<AuthCubit, AuthState>(
+          listener: (context, state) {
+             if (state is Unauthenticated) {
+                 Navigator.of(context).pop();
+             }
+          },
+          child: Padding(
             padding: EdgeInsets.only(bottom: MediaQuery.of(context).viewInsets.bottom),
             child: Container(
                 padding: const EdgeInsets.all(16),
-                height: 500,
+                height: 550, // Increased height for info
                 child: Column(
                     children: [
                         const Text("İşlem Yap", style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
@@ -279,7 +404,7 @@ class _TradeSheetState extends State<TradeSheet> {
                                                 color: isBuy ? AppColors.up : Colors.grey[200],
                                                 borderRadius: const BorderRadius.horizontal(left: Radius.circular(8)),
                                             ),
-                                            child: Text("AL", style: TextStyle(color: isBuy ? Colors.white : Colors.black)),
+                                            child: Text("AL", style: TextStyle(color: isBuy ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
                                         ),
                                     ),
                                 ),
@@ -293,31 +418,115 @@ class _TradeSheetState extends State<TradeSheet> {
                                                 color: !isBuy ? AppColors.down : Colors.grey[200],
                                                 borderRadius: const BorderRadius.horizontal(right: Radius.circular(8)),
                                             ),
-                                            child: Text("SAT", style: TextStyle(color: !isBuy ? Colors.white : Colors.black)),
+                                            child: Text("SAT", style: TextStyle(color: !isBuy ? Colors.white : Colors.black, fontWeight: FontWeight.bold)),
                                         ),
                                     ),
                                 ),
                             ],
                         ),
                         const SizedBox(height: 20),
-                        // Stock Selector (Simple Dropdown for MVP)
-                        BlocBuilder<StockBloc, StockState>(
-                            builder: (context, state) {
-                                if (state is StockLoaded) {
-                                    return DropdownButtonFormField<String>(
-                                        value: selectedSymbol,
-                                        hint: const Text("Hisse Seçiniz"),
-                                        items: state.allStocks.map((s) => DropdownMenuItem(
-                                            value: s.symbol,
-                                            child: Text("${s.symbol} - ${s.price} ₺"),
-                                        )).toList(),
-                                        onChanged: (val) => setState(() => selectedSymbol = val),
-                                    );
-                                }
-                                return const CircularProgressIndicator();
-                            },
+                        
+                        // Stock Selector
+                        BlocBuilder<InvestBossBloc, InvestBossState>(
+                          builder: (context, bossState) {
+                             return BlocBuilder<StockBloc, StockState>(
+                                builder: (context, state) {
+                                    if (state is StockLoaded) {
+                                        // Calculate available stocks based on Buy/Sell mode
+                                        var displayStocks = state.allStocks;
+                                        if (!isBuy) {
+                                            final portfolio = bossState.portfolio;
+                                            displayStocks = state.allStocks.where((s) => portfolio.any((p) => p['symbol'] == s.symbol)).toList();
+                                            
+                                            // Reset selection if current selection is not in list
+                                            if (selectedSymbol != null && !displayStocks.any((s) => s.symbol == selectedSymbol)) {
+                                                WidgetsBinding.instance.addPostFrameCallback((_) {
+                                                    if (mounted) setState(() => selectedSymbol = null);
+                                                });
+                                            }
+                                        }
+
+                                        return DropdownButtonFormField<String>(
+                                            value: selectedSymbol,
+                                            hint: const Text("Hisse Seçiniz"),
+                                            decoration: const InputDecoration(
+                                                border: OutlineInputBorder(),
+                                                contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                                            ),
+                                            items: displayStocks.map((s) => DropdownMenuItem(
+                                                value: s.symbol,
+                                                child: Row(
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                        Text(s.symbol, style: const TextStyle(fontWeight: FontWeight.bold)),
+                                                        Text("${s.price} ₺"),
+                                                    ],
+                                                ),
+                                            )).toList(),
+                                            onChanged: (val) => setState(() => selectedSymbol = val),
+                                        );
+                                    }
+                                    return const CircularProgressIndicator();
+                                },
+                            );
+                          },
                         ),
+                        
+                        // Max Quantity / Price Info
+                        if (selectedSymbol != null)
+                             Padding(
+                               padding: const EdgeInsets.only(top: 8.0),
+                               child: BlocBuilder<InvestBossBloc, InvestBossState>(
+                                 builder: (context, bossState) {
+                                     // Get Cash
+                                     final profile = bossState.profile ?? {};
+                                     final cash = (profile['cash_balance'] as num?)?.toDouble() ?? 0.0;
+                                     
+                                     // Get Price
+                                     final stockBloc = context.read<StockBloc>();
+                                     double price = 0;
+                                     if (stockBloc.state is StockLoaded) {
+                                         try {
+                                            price = (stockBloc.state as StockLoaded).allStocks.firstWhere((s) => s.symbol == selectedSymbol).price;
+                                         } catch(_) {}
+                                     }
+                                     
+                                     int maxQty = 0;
+                                     if (price > 0 && isBuy) {
+                                         maxQty = (cash / price).floor();
+                                     } else if (!isBuy) {
+                                         // If selling, find owned qty
+                                         final portfolio = bossState.portfolio;
+                                         final item = portfolio.firstWhere((e) => e['symbol'] == selectedSymbol, orElse: () => {});
+                                         if (item.isNotEmpty) {
+                                             maxQty = (item['quantity'] as num).toInt();
+                                         }
+                                     }
+                                     
+                                     return Row(
+                                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                         children: [
+                                             Text(
+                                                 isBuy ? "Mevcut Nakit: ${cash.toStringAsFixed(2)} ₺" : "Mevcut Adet: $maxQty",
+                                                 style: const TextStyle(fontSize: 12, color: Colors.grey),
+                                             ),
+                                             if (isBuy)
+                                                 Text(
+                                                     "Max Alım: $maxQty Adet",
+                                                     style: TextStyle(
+                                                         fontSize: 13, 
+                                                         fontWeight: FontWeight.bold,
+                                                         color: AppColors.accent // Explicit color for visibility
+                                                     ),
+                                                 ),
+                                         ],
+                                     );
+                                 },
+                               ),
+                             ),
+
                         const SizedBox(height: 20),
+                        
                         TextField(
                             controller: qtyController,
                             keyboardType: TextInputType.number,
@@ -326,7 +535,9 @@ class _TradeSheetState extends State<TradeSheet> {
                                 border: OutlineInputBorder(),
                             ),
                         ),
-                        const SizedBox(height: 30),
+                        
+                        const Spacer(),
+                        
                         SizedBox(
                             width: double.infinity,
                             child: ElevatedButton(
@@ -339,6 +550,9 @@ class _TradeSheetState extends State<TradeSheet> {
                                             if (stockBloc.state is StockLoaded) {
                                                 price = (stockBloc.state as StockLoaded).allStocks.firstWhere((s) => s.symbol == selectedSymbol).price;
                                             }
+                                            
+                                            // Optional: Client side validation could go here, 
+                                            // but repository also checks.
                                             
                                             final event = isBuy 
                                                 ? BuyStock(symbol: selectedSymbol!, quantity: qty, price: price)
@@ -353,111 +567,21 @@ class _TradeSheetState extends State<TradeSheet> {
                                     backgroundColor: isBuy ? AppColors.up : AppColors.down,
                                     foregroundColor: Colors.white,
                                     padding: const EdgeInsets.symmetric(vertical: 16),
+                                    shape: RoundedRectangleBorder(
+                                        borderRadius: BorderRadius.circular(12)
+                                    )
                                 ),
-                                child: Text(isBuy ? "ALIM YAP" : "SATIŞ YAP"),
+                                child: Text(
+                                    isBuy ? "ALIM YAP" : "SATIŞ YAP",
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                                ),
                             ),
                         ),
                     ],
                 ),
             ),
+          ),
         );
     }
 }
 
-// --- TAB 2: BOSS LEADERBOARD ---
-
-class BossLeaderboardTab extends StatelessWidget {
-  const BossLeaderboardTab({super.key});
-  
-  String maskName(String? firstName, String? lastName) {
-      // Default fallback
-      if (firstName == null || firstName.isEmpty) return "B*** K********"; // "Bilinmeyen Kullanıcı" placeholder
-      
-      String f = firstName.substring(0, 1) + "*" * (firstName.length - 1);
-      String l = "";
-      if (lastName != null && lastName.isNotEmpty) {
-           l = lastName.substring(0, 1) + "*" * (lastName.length - 1);
-      } else {
-           l = "*****";
-      }
-      return "$f $l";
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return BlocBuilder<InvestBossBloc, InvestBossState>(
-      builder: (context, state) {
-        if (state.status == InvestBossStatus.loading && state.leaderboard.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
-        
-        final leaderboard = state.leaderboard;
-
-        return Column(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(16),
-              color: AppColors.surface,
-              child: const Row(
-                children: [
-                  Icon(Icons.emoji_events, color: Colors.amber),
-                  SizedBox(width: 8),
-                  Text(
-                    "Liderlik Tablosu",
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                  ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: ListView.separated(
-                itemCount: leaderboard.length,
-                separatorBuilder: (c, i) => const Divider(height: 1),
-                itemBuilder: (context, index) {
-                  final item = leaderboard[index];
-                  final equity = (item['total_equity'] as num).toDouble();
-                  final initial = (item['initial_capital'] as num).toDouble();
-                  final profit = equity - initial;
-                  
-                  // Mocking name masking since we don't have access to other users' metadata easily
-                  // In a real app, 'display_name' would be in the row.
-                  // For demo purposes, we generate a masked name based on ID or index if null.
-                  // Or, if it enters the "CurrentUser", we show "Sen".
-                  
-                  // For the sake of the "Masked Name" requirement:
-                  // We simulate names like "A*** Y*****"
-                  
-                  return ListTile(
-                    leading: CircleAvatar(
-                      backgroundColor: _getRankColor(index),
-                      foregroundColor: Colors.white,
-                      child: Text("${index + 1}"),
-                    ),
-                    title: Text(
-                         maskName(item['first_name'], item['last_name']),
-                         style: const TextStyle(fontWeight: FontWeight.bold),
-                    ),
-                    trailing: Text(
-                      "${profit >= 0 ? '+' : ''}${profit.toStringAsFixed(2)} ₺",
-                      style: TextStyle(
-                        color: profit >= 0 ? AppColors.up : AppColors.down,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-  
-  Color _getRankColor(int index) {
-      if (index == 0) return Colors.amber;
-      if (index == 1) return Colors.grey;
-      if (index == 2) return Colors.brown;
-      return AppColors.primary;
-  }
-}
