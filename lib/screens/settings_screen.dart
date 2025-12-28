@@ -29,37 +29,168 @@ class SettingsScreen extends StatelessWidget {
     Widget? trailing,
     Color iconColor = AppColors.accent,
     VoidCallback? onTap,
+    bool disabled = false,
   }) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
-        ),
-      ),
-      child: ListTile(
-        onTap: onTap,
-        leading: Container(
-          padding: const EdgeInsets.all(8),
-          decoration: BoxDecoration(
-            color: iconColor.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: iconColor, size: 20),
-        ),
-        title: Text(
-          title,
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w500,
-            color: Theme.of(context).colorScheme.onSurface,
+    return Opacity(
+      opacity: disabled ? 0.5 : 1.0,
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 8),
+        decoration: BoxDecoration(
+          color: Theme.of(context).cardColor,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.1),
           ),
         ),
-        trailing:
-            trailing ?? const Icon(Icons.chevron_right, color: Colors.grey),
+        child: ListTile(
+          onTap: disabled ? null : onTap,
+          leading: Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: iconColor.withValues(alpha: 0.1),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, color: iconColor, size: 20),
+          ),
+          title: Text(
+            title,
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+          ),
+          trailing: trailing ?? Icon(Icons.chevron_right, color: Colors.grey),
+        ),
       ),
+    );
+  }
+
+  void _showPrivacyPolicy(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  Text(
+                    "Gizlilik Politikası",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Son Güncelleme: 28 Aralık 2025\n\n"
+                    "Bu uygulama (MyInvestApp), kullanıcılarının gizliliğine önem verir. "
+                    "Bu politika, uygulamamızı kullandığınızda verilerinizin nasıl toplandığını, "
+                    "kullanıldığını ve korunduğunu açıklar.\n\n"
+                    "1. Toplanan Bilgiler\n"
+                    "Kayıt sırasında sağladığınız ad, soyad ve e-posta adresi gibi temel bilgileri topluyoruz. "
+                    "Ayrıca portföy verileriniz uygulama işlevselliği için saklanmaktadır.\n\n"
+                    "2. Bilgilerin Kullanımı\n"
+                    "Toplanan bilgiler, size kişiselleştirilmiş bir deneyim sunmak, "
+                    "yatırım takibini sağlamak ve hesabınızı güvenli bir şekilde yönetmek için kullanılır.\n\n"
+                    "3. Veri Güvenliği\n"
+                    "Verileriniz güvenli sunucularda saklanır ve yetkisiz erişime karşı korunur. "
+                    "Kişisel verileriniz üçüncü şahıslarla paylaşılmaz.\n\n"
+                    "4. İletişim\n"
+                    "Sorularınız için bizimle iletişime geçebilirsiniz.",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _showTermsOfUse(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (ctx) {
+        return DraggableScrollableSheet(
+          initialChildSize: 0.7,
+          minChildSize: 0.5,
+          maxChildSize: 0.95,
+          expand: false,
+          builder: (context, scrollController) {
+            return Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: Theme.of(context).cardColor,
+                borderRadius: const BorderRadius.vertical(
+                  top: Radius.circular(20),
+                ),
+              ),
+              child: ListView(
+                controller: scrollController,
+                children: [
+                  Text(
+                    "Kullanım Koşulları",
+                    style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    "Son Güncelleme: 28 Aralık 2025\n\n"
+                    "Lütfen uygulamamızı kullanmadan önce aşağıdaki koşulları dikkatlice okuyunuz.\n\n"
+                    "1. Kabul Edilme\n"
+                    "Bu uygulamayı kullanarak, bu koşulları kabul etmiş sayılırsınız.\n\n"
+                    "2. Sorumluluk Reddi\n"
+                    "Bu uygulama sadece bilgilendirme ve takip amaçlıdır. "
+                    "Burada yer alan veriler yatırım tavsiyesi niteliği taşımaz. "
+                    "Yatırım kararlarınızdan doğacak arak zararlardan uygulamamız sorumlu tutulamaz.\n\n"
+                    "3. Hesap Güvenliği\n"
+                    "Hesap şifrenizin güvenliğinden kullanıcı sorumludur. "
+                    "Şüpheli bir durum fark ettiğinizde lütfen bildirin.\n\n"
+                    "4. Değişiklikler\n"
+                    "Bu koşullar önceden haber verilmeksizin güncellenebilir.",
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurface,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -121,8 +252,12 @@ class SettingsScreen extends StatelessWidget {
   }
 
   String _getTextSizeLabel(double scale) {
-    if (scale < 0.9) return "Küçük";
-    if (scale > 1.1) return "Büyük";
+    if (scale < 0.9) {
+      return "Küçük";
+    }
+    if (scale > 1.1) {
+      return "Büyük";
+    }
     return "Orta";
   }
 
@@ -185,21 +320,35 @@ class SettingsScreen extends StatelessWidget {
 
   void _showEditProfileBottomSheet(BuildContext context) {
     final authState = context.read<AuthCubit>().state;
-    if (authState is! Authenticated) return;
+    if (authState is! Authenticated) {
+      return;
+    }
 
     final user = authState.user;
     final metadata = user.userMetadata ?? {};
 
-    final firstNameController = TextEditingController(text: metadata['first_name'] as String? ?? '');
-    final lastNameController = TextEditingController(text: metadata['last_name'] as String? ?? '');
-    final ageController = TextEditingController(text: (metadata['age'] as int?)?.toString() ?? '');
-    final cityController = TextEditingController(text: metadata['city'] as String? ?? '');
-    final countryController = TextEditingController(text: metadata['country'] as String? ?? 'Türkiye');
+    final firstNameController = TextEditingController(
+      text: metadata['first_name'] as String? ?? '',
+    );
+    final lastNameController = TextEditingController(
+      text: metadata['last_name'] as String? ?? '',
+    );
+    final ageController = TextEditingController(
+      text: (metadata['age'] as int?)?.toString() ?? '',
+    );
+    final cityController = TextEditingController(
+      text: metadata['city'] as String? ?? '',
+    );
+    final countryController = TextEditingController(
+      text: metadata['country'] as String? ?? 'Türkiye',
+    );
     String selectedGender = metadata['gender'] as String? ?? 'Erkek';
     final genders = ['Erkek', 'Kadın', 'Diğer'];
-    
+
     // Ensure selectedGender is valid
-    if (!genders.contains(selectedGender)) selectedGender = 'Erkek';
+    if (!genders.contains(selectedGender)) {
+      selectedGender = 'Erkek';
+    }
 
     showModalBottomSheet(
       context: context,
@@ -255,10 +404,19 @@ class SettingsScreen extends StatelessWidget {
                         flex: 2,
                         child: DropdownButtonFormField<String>(
                           initialValue: selectedGender,
-                          decoration: const InputDecoration(labelText: 'Cinsiyet'),
-                          items: genders.map((g) => DropdownMenuItem(value: g, child: Text(g))).toList(),
+                          decoration: const InputDecoration(
+                            labelText: 'Cinsiyet',
+                          ),
+                          items: genders
+                              .map(
+                                (g) =>
+                                    DropdownMenuItem(value: g, child: Text(g)),
+                              )
+                              .toList(),
                           onChanged: (val) {
-                            if (val != null) setState(() => selectedGender = val);
+                            if (val != null) {
+                              setState(() => selectedGender = val);
+                            }
                           },
                         ),
                       ),
@@ -295,13 +453,13 @@ class SettingsScreen extends StatelessWidget {
                   ElevatedButton(
                     onPressed: () {
                       context.read<AuthCubit>().updateProfile(
-                            firstName: firstNameController.text.trim(),
-                            lastName: lastNameController.text.trim(),
-                            gender: selectedGender,
-                            age: int.tryParse(ageController.text),
-                            city: cityController.text.trim(),
-                            country: countryController.text.trim(),
-                          );
+                        firstName: firstNameController.text.trim(),
+                        lastName: lastNameController.text.trim(),
+                        gender: selectedGender,
+                        age: int.tryParse(ageController.text),
+                        city: cityController.text.trim(),
+                        country: countryController.text.trim(),
+                      );
                       Navigator.pop(context);
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Profil güncellendi')),
@@ -362,7 +520,9 @@ class SettingsScreen extends StatelessWidget {
               const SizedBox(height: 16),
               TextField(
                 controller: confirmPasswordController,
-                decoration: const InputDecoration(labelText: 'Yeni Şifre (Tekrar)'),
+                decoration: const InputDecoration(
+                  labelText: 'Yeni Şifre (Tekrar)',
+                ),
                 obscureText: true,
               ),
               const SizedBox(height: 24),
@@ -371,7 +531,9 @@ class SettingsScreen extends StatelessWidget {
                   final password = passwordController.text.trim();
                   if (password.length < 6) {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Şifre en az 6 karakter olmalı.')),
+                      const SnackBar(
+                        content: Text('Şifre en az 6 karakter olmalı.'),
+                      ),
                     );
                     return;
                   }
@@ -381,7 +543,7 @@ class SettingsScreen extends StatelessWidget {
                     );
                     return;
                   }
-                  
+
                   context.read<AuthCubit>().updatePassword(password);
                   Navigator.pop(context);
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -437,20 +599,28 @@ class SettingsScreen extends StatelessWidget {
             context,
             icon: Icons.notifications,
             title: "Anlık Fiyat Bildirimleri",
-            trailing: Switch(
-              value: true,
-              onChanged: (v) {},
-              activeThumbColor: AppColors.accent,
+            disabled: true,
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text("Yakında", style: TextStyle(fontSize: 10)),
             ),
           ),
           _buildSettingsTile(
             context,
             icon: Icons.newspaper,
             title: "Haber ve Analizler",
-            trailing: Switch(
-              value: false,
-              onChanged: (v) {},
-              activeThumbColor: AppColors.accent,
+            disabled: true,
+            trailing: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.grey.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Text("Yakında", style: TextStyle(fontSize: 10)),
             ),
           ),
 
@@ -513,7 +683,7 @@ class SettingsScreen extends StatelessWidget {
             icon: Icons.info,
             title: "Uygulama Sürümü",
             trailing: const Text(
-              "1.2.3",
+              "0.6.9",
               style: TextStyle(color: Colors.grey, fontSize: 12),
             ),
           ),
@@ -521,11 +691,13 @@ class SettingsScreen extends StatelessWidget {
             context,
             icon: Icons.privacy_tip,
             title: "Gizlilik Politikası",
+            onTap: () => _showPrivacyPolicy(context),
           ),
           _buildSettingsTile(
             context,
             icon: Icons.gavel,
             title: "Kullanım Koşulları",
+            onTap: () => _showTermsOfUse(context),
           ),
           // Bottom spacer for FAB
           const SizedBox(height: 80),

@@ -1,16 +1,9 @@
-# stock_tracker
+# MyInvest-App
+Küçük ve Orta ölçekli yatırımcının Yatırım yaptığı hissleri seçip fiyat değişimlerini kolaylıkla takip edebilmesini ve yatırım geçmişini kaydedebilmesini sağlayan bir uygulama.
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Ekran Görüntüleri
+![Uygulama Ana Ekran](img/ana-ekran.png)
+![Uygulama Login ekranı](img/1.png)
+![Uygulama register ekranı](img/2.png)
+![Uygulama canlı takip ekranı](img/3.png)
+![Uygulama ayarlar ekranı](img/4.png)

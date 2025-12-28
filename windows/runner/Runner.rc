@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "stock_tracker" "\0"
+            VALUE "FileDescription", "MyInvestApp" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "stock_tracker" "\0"
+            VALUE "InternalName", "MyInvestApp" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2025 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "stock_tracker.exe" "\0"
-            VALUE "ProductName", "stock_tracker" "\0"
+            VALUE "OriginalFilename", "MyInvestApp.exe" "\0"
+            VALUE "ProductName", "MyInvestApp" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
