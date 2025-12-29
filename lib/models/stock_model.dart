@@ -3,12 +3,14 @@ class Stock {
   final String name;
   final double price;
   final double changeRate; // e.g. 2.15 for +2.15%
+  final double? weekChangeRate; // For 7-day AI analysis
 
   Stock({
     required this.symbol,
     required this.name,
     required this.price,
     required this.changeRate,
+    this.weekChangeRate,
   });
 
   factory Stock.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,7 @@ class Stock {
       name: json['shortName'] ?? json['symbol'],
       price: (json['regularMarketPrice'] as num).toDouble(),
       changeRate: (json['regularMarketChangePercent'] as num).toDouble(),
+      weekChangeRate: null, // Populated later via Spark endpoint
     );
   }
 
@@ -34,6 +37,16 @@ class Stock {
     wholePart = wholePart.replaceAllMapped(reg, (Match match) => '${match[1]}.');
     
     return "₺$wholePart,$decimalPart";
+  }
+
+  Stock copyWith({double? weekChangeRate}) {
+    return Stock(
+      symbol: symbol,
+      name: name,
+      price: price,
+      changeRate: changeRate,
+      weekChangeRate: weekChangeRate ?? this.weekChangeRate,
+    );
   }
 }
 

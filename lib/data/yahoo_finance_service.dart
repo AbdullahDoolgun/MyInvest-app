@@ -166,6 +166,81 @@ class YahooFinanceService {
     }
   }
 
+  Future<Map<String, double>> get7DayPriceChanges(List<String> symbols) async {
+    if (symbols.isEmpty) return {};
+
+    await _authenticate();
+
+    final uniqueSymbols = symbols.toSet().toList();
+    final symbolsParam = uniqueSymbols
+        .map((s) => s.endsWith('.IS') ? s : '$s.IS')
+        .join(',');
+
+    // Spark Endpoint for lightweight historical data
+    String urlString =
+        "https://query1.finance.yahoo.com/v7/finance/spark?symbols=$symbolsParam&range=7d&interval=1d";
+    if (_crumb != null && _crumb!.isNotEmpty) {
+      urlString += "&crumb=$_crumb";
+    }
+
+    final url = Uri.parse(urlString);
+
+    try {
+      final requestHeaders = Map<String, String>.from(_headers);
+      if (_cookie != null) {
+        requestHeaders['Cookie'] = _cookie!;
+      }
+
+      final response = await http.get(url, headers: requestHeaders);
+
+      if (response.statusCode == 200) {
+        final data = json.decode(response.body);
+        final result = data['spark']?['result'];
+
+        Map<String, double> changes = {};
+
+        if (result != null) {
+          for (var item in result) {
+            final symbolWithSuffix = item['symbol'] as String;
+            final symbol = symbolWithSuffix.replaceFirst('.IS', '');
+            final timestamps = item['response']?[0]?['timestamp'];
+            final quotes =
+                item['response']?[0]?['indicators']?['quote']?[0]?['close'];
+
+            if (timestamps != null && quotes != null && quotes.length >= 2) {
+              // Find first non-null close
+              double? startPrice;
+              for (var q in quotes) {
+                if (q != null) {
+                  startPrice = (q as num).toDouble();
+                  break;
+                }
+              }
+
+              // Find last non-null close
+              double? endPrice;
+              for (int i = quotes.length - 1; i >= 0; i--) {
+                if (quotes[i] != null) {
+                  endPrice = (quotes[i] as num).toDouble();
+                  break;
+                }
+              }
+
+              if (startPrice != null && endPrice != null && startPrice != 0) {
+                final change = ((endPrice - startPrice) / startPrice) * 100;
+                changes[symbol] = change;
+              }
+            }
+          }
+        }
+        return changes;
+      }
+    } catch (e) {
+      debugPrint("Yahoo Spark Error: $e");
+    }
+    return {};
+  }
+
   void _clearAuth() {
     _cookie = null;
     _crumb = null;

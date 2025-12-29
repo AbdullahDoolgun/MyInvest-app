@@ -288,6 +288,24 @@ class StockRepository {
         allFetchedStocks.addAll(chunkResults);
       }
 
+      // Fetch 7-Day Performance Data
+      if (allFetchedStocks.isNotEmpty) {
+        final symbolList = allFetchedStocks.map((s) => s.symbol).toList();
+        final weeklyChanges = await _yahooService.get7DayPriceChanges(
+          symbolList,
+        );
+
+        // Merge Data
+        for (int i = 0; i < allFetchedStocks.length; i++) {
+          final s = allFetchedStocks[i];
+          if (weeklyChanges.containsKey(s.symbol)) {
+            allFetchedStocks[i] = s.copyWith(
+              weekChangeRate: weeklyChanges[s.symbol],
+            );
+          }
+        }
+      }
+
       if (allFetchedStocks.isNotEmpty) {
         return allFetchedStocks;
       }
@@ -344,9 +362,22 @@ class StockRepository {
           stock: stockData,
           quantity: quantity,
           averageCost: avgCost,
-          weeklyRec: "NÖTR", // Default or fetch logic
-          monthlyRec: "NÖTR",
-          threeMonthlyRec: "NÖTR",
+          weeklyRec: _calculateRecommendation(
+            stockData.changeRate,
+            stockData.weekChangeRate, // Use Real 7-day data
+          ),
+          monthlyRec: _calculateRecommendation(
+            stockData.changeRate / 2,
+            stockData.weekChangeRate != null
+                ? stockData.weekChangeRate! * 4
+                : null,
+          ), // Mock logic for monthly
+          threeMonthlyRec: _calculateRecommendation(
+            stockData.changeRate / 4,
+            stockData.weekChangeRate != null
+                ? stockData.weekChangeRate! * 12
+                : null,
+          ), // Mock logic
         ),
       );
     }
@@ -436,7 +467,26 @@ class StockRepository {
         name: "$symbol A.Ş.", // Removed (Mock) suffix
         price: price,
         changeRate: (symbol.hashCode % 200 - 100) / 100.0 * 5.0,
+        weekChangeRate: (symbol.hashCode % 300 - 150) / 100.0 * 5.0, // Mock 7-day data
       );
     }).toList();
+  }
+
+  String _calculateRecommendation(double dailyChange, [double? weeklyChange]) {
+    // If we have 7-day data, use it for main recommendation
+    if (weeklyChange != null) {
+      if (weeklyChange >= 5.0) return "GÜÇLÜ AL";
+      if (weeklyChange >= 1.5) return "AL";
+      if (weeklyChange <= -5.0) return "GÜÇLÜ SAT";
+      if (weeklyChange <= -1.5) return "SAT";
+      return "NÖTR";
+    }
+
+    // Fallback to daily data
+    if (dailyChange >= 3.0) return "GÜÇLÜ AL";
+    if (dailyChange >= 1.0) return "AL";
+    if (dailyChange <= -3.0) return "GÜÇLÜ SAT";
+    if (dailyChange <= -1.0) return "SAT";
+    return "NÖTR";
   }
 }

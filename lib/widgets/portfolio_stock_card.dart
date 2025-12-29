@@ -27,7 +27,7 @@ class PortfolioStockCard extends StatelessWidget {
 
   Color _getColorForRec(String rec) {
     if (rec == "AL" || rec == "GÜÇLÜ AL") return AppColors.up;
-    if (rec == "SAT") return AppColors.down;
+    if (rec == "SAT" || rec == "GÜÇLÜ SAT") return AppColors.down;
     return AppColors.textSecondary; // Nötr
   }
 
@@ -36,7 +36,7 @@ class PortfolioStockCard extends StatelessWidget {
     if (rec == "AL" || rec == "GÜÇLÜ AL") {
       return isDark ? AppColors.up.withValues(alpha: 0.2) : AppColors.upLight;
     }
-    if (rec == "SAT") {
+    if (rec == "SAT" || rec == "GÜÇLÜ SAT") {
       return isDark
           ? AppColors.down.withValues(alpha: 0.2)
           : AppColors.downLight;
